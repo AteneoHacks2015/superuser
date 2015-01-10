@@ -1,0 +1,169 @@
+extends ./base.jade
+
+block page_header
+   .col-sm-12
+      .page-header
+         // BREADCRUMBS
+         ul.breadcrumb
+            li
+               i.fa.fa-home
+               a(href='index.html') Home
+            li Dashboard
+         // /BREADCRUMBS
+         .clearfix
+            h3.content-title.pull-left Dashboard
+            // DATE RANGE PICKER
+            span.date-range.pull-right
+               .btn-group
+                 a.js_update.btn.btn-default(href='#') Today
+                  a.js_update.btn.btn-default(href='#') Last 7 Days
+                  a.js_update.btn.btn-default.hidden-xs(href='#') Last month
+                  a#reportrange.btn.reportrange
+                     i.fa.fa-calendar
+                     span
+                    
+                     i.fa.fa-angle-down
+            // /DATE RANGE PICKER
+         .description Overview, Statistics and more
+
+block page_content
+   span
+      | your ip address is {{ ip_address }}
+   br
+   span
+      | your geolocation is {{ lng }}, {{ lat }}
+   br
+   .col-md-4(style='padding-left:30px;border:1px solid;')
+      .row
+         form.form-inline#search-form(role='form', action="/test")
+            .form-group
+               input.form-control#search-query(type='text',placeholder='Search Place to Study')
+            .form-group
+               button#location-search(type='button',class='btn btn-success')
+                  | Search
+      .row(style='border:solid 1px;')
+
+
+   .col-md-8
+      #map(style='width: 99%; height: 400px; background: grey; margin-right: 1%')
+
+block post_scripts
+   link(rel='stylesheet', type='text/css', href='http://js.api.here.com/v3/3.0/mapsjs-ui.css')  
+   script(type='text/javascript', charset='UTF-8', src='http://js.api.here.com/v3/3.0/mapsjs-core.js')
+   script(type='text/javascript', charset='UTF-8', src='http://js.api.here.com/v3/3.0/mapsjs-service.js')
+   script(type='text/javascript', charset='UTF-8', src='http://js.api.here.com/v3/3.0/mapsjs-mapevents.js')
+   script(type='text/javascript', charset='UTF-8', src='http://js.api.here.com/v3/3.0/mapsjs-ui.js')
+   //- script(type='text/javascript', charset='UTF-8', src='#{STATIC_URL}js/map_functions.js')
+
+   script
+      function addMarkerToGroup(group, coordinate, html) {
+        var marker = new H.map.Marker(coordinate);
+        // add custom data to the marker
+        marker.setData(html);
+        group.addObject(marker);
+      }
+
+      var location_long = {{ lng }}, location_lat = {{ lat }};
+      var app_id = 'DemoAppId01082013GAL',
+         app_code = 'AJKnXv84fjrb0KIHawS0Tg';
+
+      function moveMapToQC(map){
+        map.setCenter({lat:14.64755, lng:121.05118});
+        map.setZoom(14);
+      }
+
+      //Step 1: initialize communication with the platform
+      var platform = new H.service.Platform({
+      app_id: 'DemoAppId01082013GAL',
+       app_code: 'AJKnXv84fjrb0KIHawS0Tg',
+       useCIT: true
+      });
+      var defaultLayers = platform.createDefaultLayers();
+
+      //Step 2: initialize a map  - not specificing a location will give a whole world view.
+      var map = new H.Map(document.getElementById('map'), defaultLayers.normal.map);
+      window.mymap = map;
+      //Step 3: make the map interactive
+      // MapEvents enables the event system
+      // Behavior implements default interactions for pan/zoom (also on mobile touch environments)
+      var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+
+      // Create the default UI components
+      var ui = H.ui.UI.createDefault(map, defaultLayers);
+
+      moveMapToQC(map);
+
+      function doSearch(){
+         var query = $("input#search-query").val();
+         $.ajax({
+            // url: '//geocoder.cit.api.here.com/6.2/geocode.json',
+            // data: {'searchtext': query, 'app_id': app_id, 'app_code':app_code, 'gen': 6},
+            url: '//places.demo.api.here.com/places/v1/discover/search',
+            data: {'at': location_long + "," + location_lat, 
+                   'accept': 'application/json',
+                   'q': query, 'app_id': app_id, 'app_code':app_code},
+            dataType: 'json',
+            success: function(data){
+               console.log('removing previous objects');
+               // remove previous search
+               try{
+                 map.removeObjects(map.getObjects());            
+               }catch(err){}
+
+               var group = new H.map.Group();
+               map.addObject(group);
+
+               // add 'tap' event listener, that opens info bubble, to the group
+               group.addEventListener('tap', function (evt) {
+                  // event target is the marker itself, group is a parent event target
+                  // for all objects that it contains
+
+                  // remove other infobubbles
+                  var bubs = ui.getBubbles();
+                  for (i=0; i < bubs.length; i++){ui.removeBubble(bubs[i]);}
+
+                  var bubble =  new H.ui.InfoBubble(evt.target.getPosition(), {
+                     // read custom data
+                     content: evt.target.getData()
+                  });
+                  // show info bubble
+                  ui.addBubble(bubble);
+               }, false);
+
+               console.log(data);
+               // parse data and add markers on the map
+               var results = data.results.items;
+
+               
+
+               for (var i in results){
+                  var result = results[i];
+                  console.log(result);
+                  console.log("Adding: "+ result.title+ " @ " +result.position[0] + ","+result.position[1])
+                  // add marker on map
+                  addMarkerToGroup(group, {lat: result.position[0], lng:result.position[1]},
+                     '<div style="width:180px;padding:2px 5px"><h4>'+ result.title + '</h4><span class="infobubble-vicinity">'+result.vicinity+
+                     '<span><br/><a href="#">Study here</a></div>');
+               }
+               map.setViewBounds(group.getBounds());
+               
+               window.setTimeout(function(){
+                  if (map.getZoom() > 13){
+                  map.setZoom(map.getZoom() - 1, true);}
+               },80);
+               
+            },
+            error: function(data){
+               console.log('error');
+            }
+         });
+      }
+      $('button#location-search').click(doSearch);
+      $('form#search-form').submit(function(e){
+         e.preventDefault();
+         doSearch();
+      });
+
+block css
+   style
+      span.infobubble-vicinity{font-size: 12px;}

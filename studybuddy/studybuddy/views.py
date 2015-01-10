@@ -1,3 +1,6 @@
+from studybuddy.models import *
+from studybuddy.utils import get_client_ip, ip_to_location
+from datetime import date, datetime, time, timedelta
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from studybuddy.models import *
@@ -50,3 +53,13 @@ def studyInterestsQuery(request):
         result_list.append({"name": result.name, "id": result.id})
 
     return HttpResponse(json.dumps(result_list))
+
+def create_study_session(request):
+    ip_address = get_client_ip(request)
+    lng, lat = ip_to_location(ip_address, default=True)
+
+    vars_ = {'lng': lng, 
+             'lat': lat,
+             'ip_address': ip_address}
+
+    return render(request, "maps.jade", vars_)
