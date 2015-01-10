@@ -35,14 +35,24 @@ class User(models.Model):
         return False
 
     def addStudyInterest(self, name):
-        query = StudyInterest.objects.filter(name=name)
-        if query.count() > 0:
-            self.interests.add(query.get())
-        else:
-            newInterest = StudyInterest(name=name, description=name).save()
-            self.interests.add(newInterest)
+        try:
+            interest = StudyInterest.objects.get(name=name)
+        except StudyInterest.DoesNotExist:
+            interest = StudyInterest(name=name, description=name)
+            interest.save()
 
+        self.interests.add(interest)
         self.save()
+
+    def removeStudyInterest(self, id):
+        try:
+            interest = StudyInterest.objects.get(id=id)
+        except StudyInterest.DoesNotExist:
+            return False
+
+        self.interests.remove(interest)
+        self.save()
+
 
     # Class Methods
 
