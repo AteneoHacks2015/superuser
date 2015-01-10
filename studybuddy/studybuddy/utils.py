@@ -1,3 +1,5 @@
+import urllib2, json
+
 def get_client_ip(request):
     """Returns the ip-address of the request"""
 
@@ -13,9 +15,6 @@ def ip_to_location(ip_address, default=False):
         uses external api
 
         If an error occurs, use default longitude, latitude"""
-
-    import urllib2, json
-
     try:
         query_url = "http://api.hostip.info/get_json.php?position=true&ip=%(ip_address)s"
         #response = urllib2.urlopen(query_url % {'ip_address': ip_address})
