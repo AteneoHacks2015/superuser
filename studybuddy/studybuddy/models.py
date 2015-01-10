@@ -32,7 +32,7 @@ class StudyGroup(models.Model):
     description = models.TextField()
     creator = models.ForeignKey(User)
     location = models.TextField()
-    time = models.DateTimeField()
+    datetime = models.DateTimeField()
     targetInterest = models.ForeignKey(StudyInterest)
     targetChannels = models.ManyToManyField(InterestChannel, null=True, blank=True)
     members = models.ManyToManyField(User)
