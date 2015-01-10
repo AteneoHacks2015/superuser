@@ -30,19 +30,19 @@ class StudyInterest(models.Model):
 class StudyGroup(models.Model):
     maxMembers = models.IntegerField()
     description = models.TextField()
-    creator = models.ForeignKey(User)
+    creator = models.ForeignKey(User, related_name='creator')
     location = models.TextField()
     time = models.DateTimeField()
     targetInterest = models.ForeignKey(StudyInterest)
     targetChannels = models.ManyToManyField(InterestChannel, null=True, blank=True)
-    members = models.ManyToManyField(User)
+    members = models.ManyToManyField(User, related_name='members')
     isPrivate = models.BooleanField(default=False)
     creationTime = models.DateTimeField(auto_now_add=True)
 
 class Notification(models.Model):
     text = models.TextField()
-    sourceUser = models.ForeignKey(User, null=True, blank=True)
-    targetUser = models.ForeignKey(User)
+    sourceUser = models.ForeignKey(User, null=True, blank=True, related_name='sourceUser')
+    targetUser = models.ForeignKey(User, related_name='targetUser')
     status = models.CharField(max_length=2, choices=(('0', 'Unread'), ('1', 'Read')))
     creationTime = models.DateTimeField(auto_now_add=True)
     studyGroup = models.ForeignKey(StudyGroup)
