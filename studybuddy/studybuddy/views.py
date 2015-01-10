@@ -6,12 +6,25 @@ from django.http import HttpResponse
 from studybuddy.models import *
 from studybuddy import sessionmanager as SM
 import json
-from studybuddy.celery import send_sms
+from studybuddy.celery import send_sms, debug_task
 import hashlib
+
+import redis
+
+redis_server = redis.StrictRedis(host='localhost', port=6379, db=0)
+pubsub = redis_server.pubsub()
 
 def test(request):
     message_id = hashlib.md5('639474325719' + '6:42').hexdigest()
-    send_sms.delay(number='639474325719', message='hi kix', message_id=message_id)
+    #send_sms.delay(number='639474325719', message='hi kix', message_id=message_id)
+    
+    x = {
+        'interest_name':'lol',
+        'channel_name':'lol'
+    }
+
+    redis_server.publish("interest-%s.channel-%s"%(x['interest_name'], x['channel_name']), x)
+    
     return HttpResponse()
 
 # User Account Views #####################################################################
@@ -100,3 +113,32 @@ def create_study_session(request):
 
 def dashboardMain(request):
     return render(request, "dashboard.jade")
+
+
+#Callbacks for channel and group listeners
+def channel_listener_callback(message):
+    data = message['data']
+    
+    #check for the keys in the data, kinda like RRSV
+    if not 'interest_name' in data and not 'channel_name' in data:
+        return
+
+    #interest_name = data['interest_name']
+    #channel_name= data['channel_name']
+
+    #interest = StudyInterest.objects.get(name=interest_name)
+    #channel = interest.channels.get(name=channel_name)
+    #users = channel.user_set.all()
+
+    #generate message_id using timestamp
+
+    #send message based on change
+
+    '''
+    for u in users:
+        #send_sms.delay(number=u.phone, message=msg, message_id="")
+        print "users!"
+        print u'''
+
+    print 'data!'
+    print data
