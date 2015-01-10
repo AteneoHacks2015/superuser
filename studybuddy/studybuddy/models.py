@@ -75,11 +75,17 @@ class User(models.Model):
 
         return newUser
 
+class Location(models.Model):
+    name = models.CharField(max_length=32)
+    here_id = models.CharField(max_length=64)
+    lng = models.DecimalField(max_digits=5)
+    lat = models.DecimalField(max_digits=5)
+
 class StudyGroup(models.Model):
     maxMembers = models.IntegerField()
     description = models.TextField()
     creator = models.ForeignKey(User, related_name='creator')
-    location = models.TextField()
+    location = models.ForeignKey(Location)
     datetime = models.DateTimeField()
     targetInterest = models.ForeignKey(StudyInterest)
     targetChannels = models.ManyToManyField(InterestChannel)
