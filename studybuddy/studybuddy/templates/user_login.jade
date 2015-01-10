@@ -1,0 +1,37 @@
+extends ./base.jade
+
+block page_header
+   .col-sm-12
+      .page-header
+         // BREADCRUMBS
+         ul.breadcrumb
+            li
+               i.fa.fa-home
+               a(href='index.html') Home
+            li Create account
+         // BREADCRUMBS
+         .clearfix
+            h3.content-title.pull-left Login
+            // DATE RANGE PICKER
+            // /DATE RANGE PICKER
+         .description Login to your StudyBuddy account
+
+block page_content
+
+   .col-md-6
+      .box.border.green
+         .box-title
+            h4
+               i.fa-key.fa
+               span Login
+         .box-body
+            form.form-horizontal(method="POST")
+               {% csrf_token %}
+               label.control-label(for="username") Username
+               input.form-control(name="username", required)
+               label.control-label(for="password") Password
+               input.form-control(name="password", type="password")
+               br
+               button.btn.btn-success Login
+
+block post_scripts
