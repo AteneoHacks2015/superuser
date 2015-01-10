@@ -26,8 +26,8 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
-#Celery
-BROKER_URL = 'django://'
+#Celery broker (using redis)
+BROKER_URL = 'redis://localhost:6379/0'
 
 # Application definition
 
@@ -38,7 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'kombu.transport.django',
+    #'kombu.transport.django',
     'studybuddy',           # Core
 )
 
