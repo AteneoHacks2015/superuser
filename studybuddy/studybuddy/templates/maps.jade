@@ -43,9 +43,54 @@ block page_content
                   | Search
       .row(style='border:solid 1px;')
 
-
    .col-md-8
       #map(style='width: 99%; height: 400px; background: grey; margin-right: 1%')
+
+   // Modal
+   #create-session-modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            button.close(type='button', data-dismiss='modal')
+              span(aria-hidden='true') &times;
+              span.sr-only Close  
+            h3#myModalLabel.modal-title Study at
+               span#study-location-name
+          form.form-horizontal#create-study-session(role="form")
+               .modal-body
+                  .form-group
+                     label(for='study-session-name')
+                        | Study Session Name
+                     input.form-control#study-session-name(type='text',placeholder='Integral Calculus Review',name='name',required)
+                  .form-group
+                     label(for='description')
+                        | Description (Optional)
+                     input.form-control#description(type='text',placeholder='Review session for basic, and advanced Calculus',name='description')
+                  .form-group
+                     label(for='target-interest')
+                        | Interest
+                     input.form-control#target-interest(type='text',required,name="targetInterest")
+                  .form-group
+                     label(for='target-channels')
+                        | Channels
+                     input.form-control#target-channels(type='text',name="targetChannels")
+                  .form-group
+                     label(for='max-members')
+                        | Maximum Students
+                     input.form-control#max-members(type='number',name='maxMembers',min="0",max="30",value='0',required)
+                  .form-group
+                     label(for='datetime')
+                        | Date and Time
+                     input.form-control#datetime-picker(type='text',name='datetime',required)
+
+                  input(type='hidden',name='here_id')
+                  input(type='hidden',name='longitude')
+                  input(type='hidden',name='latitude')
+                  input(type='hidden',name='place_name')
+
+               .modal-footer
+                  button.btn.btn-default(type='button', data-dismiss='modal') Close   
+                  button.btn.btn-primary(type='submit') Create Study Session
 
 block post_scripts
    link(rel='stylesheet', type='text/css', href='http://js.api.here.com/v3/3.0/mapsjs-ui.css')  
@@ -53,14 +98,34 @@ block post_scripts
    script(type='text/javascript', charset='UTF-8', src='http://js.api.here.com/v3/3.0/mapsjs-service.js')
    script(type='text/javascript', charset='UTF-8', src='http://js.api.here.com/v3/3.0/mapsjs-mapevents.js')
    script(type='text/javascript', charset='UTF-8', src='http://js.api.here.com/v3/3.0/mapsjs-ui.js')
-   //- script(type='text/javascript', charset='UTF-8', src='#{STATIC_URL}js/map_functions.js')
+   script(src='#{STATIC_URL}tagsinput/bootstrap-tagsinput.js')
+   script(src='#{STATIC_URL}js/typeahead.js')
+   script(src='#{STATIC_URL}js/jquery.datetimepicker.js')
 
    script
+      var studyInterests = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: '/studyinterests/query/?query=%QUERY',
+      });
+      studyInterests.initialize();
+
+      $("#target-interest").tagsinput({
+            typeaheadjs: {
+               name: 'studyInterests',
+               displayKey: 'name',
+               valueKey: 'name',
+               source: studyInterests.ttAdapter()
+            }
+      });
+      $(".bootstrap-tagsinput").addClass("form-control");
+
+
       function addMarkerToGroup(group, coordinate, html) {
         var marker = new H.map.Marker(coordinate);
         // add custom data to the marker
         marker.setData(html);
-        group.addObject(marker);
+        group.addObject(marker); 
       }
 
       var location_long = {{ lng }}, location_lat = {{ lat }};
@@ -120,11 +185,18 @@ block post_scripts
 
                   // remove other infobubbles
                   var bubs = ui.getBubbles();
+                  var data_ = evt.target.getData();
                   for (i=0; i < bubs.length; i++){ui.removeBubble(bubs[i]);}
+
+                  $('span#study-location-name').text(" "+data_.title);
+                  $('input[name="here_id"]').val(data_.res.id);
+                  $('input[name="longitude"]').val(data_.res.position[0]);
+                  $('input[name="latitude"]').val(data_.res.position[1]);
+                  $('input[name="place_name"]').val(data_.title);
 
                   var bubble =  new H.ui.InfoBubble(evt.target.getPosition(), {
                      // read custom data
-                     content: evt.target.getData()
+                     content: data_.html
                   });
                   // show info bubble
                   ui.addBubble(bubble);
@@ -140,8 +212,9 @@ block post_scripts
                   console.log("Adding: "+ result.title+ " @ " +result.position[0] + ","+result.position[1])
                   // add marker on map
                   addMarkerToGroup(group, {lat: result.position[0], lng:result.position[1]},
-                     '<div style="width:180px;padding:2px 5px"><h4>'+ result.title + '</h4><span class="infobubble-vicinity">'+result.vicinity+
-                     '<span><br/><a href="#">Study here</a></div>');
+                     {'res':result,'title':result.title+ ", " + result.vicinity.split('<br/>')[0] ,
+                     'html':'<div style="width:180px;padding:2px 5px"><h4>'+ result.title + '</h4><span class="infobubble-vicinity">'+result.vicinity+
+                     '<span><br/><a href="#create-session-modal" data-target="#create-session-modal" data-toggle="modal">Plan a study session here!</a></div>'});
                }
                map.setViewBounds(group.getBounds());
                
@@ -162,6 +235,40 @@ block post_scripts
          doSearch();
       });
 
-block css
+      $("#datetime-picker").datetimepicker({
+         minDate:0
+      });
+
+      $("form#create-study-session").click(function(e){
+         e.preventDefault();
+
+         var paramObj = {};
+         $.each($('form#create-study-session').serializeArray(), function(_, kv) {
+            if (paramObj.hasOwnProperty(kv.name)) {
+               paramObj[kv.name] = $.makeArray(paramObj[kv.name]);
+               paramObj[kv.name].push(kv.value);
+            }
+            else {
+               paramObj[kv.name] = kv.value;
+            }   
+         });
+
+         $.ajax({
+            url: '/study_sessions/create/',
+            type: 'post',
+            data: paramObj,
+            success: function(data){
+               console.log(data);
+            },
+            error: function(){
+               console.log('error')
+            }
+         });
+      });
+
+block css   
+   link(rel='stylesheet', type='text/css', href='#{STATIC_URL}css/jquery.datetimepicker.css')
+   link(rel='stylesheet', type='text/css', href='#{STATIC_URL}tagsinput/bootstrap-tagsinput.css')
    style
       span.infobubble-vicinity{font-size: 12px;}
+      .modal-body{padding: 5px 70px}

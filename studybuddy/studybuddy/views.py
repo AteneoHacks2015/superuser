@@ -4,6 +4,7 @@ from datetime import date, datetime, time, timedelta
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from studybuddy.models import *
 from studybuddy import sessionmanager as SM
 import json
@@ -30,6 +31,8 @@ def createUser(request):
             user = User.createUser(details)
         except Exception, e:
             if e == "User already exists.": pass
+            import logging
+            logging.exception(e)
 
         if user:
             for interest in request.POST.get("interests").split(","):
@@ -52,6 +55,7 @@ def logoutUser(request):
 
 def studyInterestsQuery(request):
     results = StudyInterest.searchByName(request.GET.get("query"))
+
     result_list = []
     for result in results:
         result_list.append({"name": result.name, "id": result.id})
@@ -103,13 +107,19 @@ def dashboardMain(request):
     return render(request, "dashboard.jade")
 
 @require_POST
+@csrf_exempt
 def create_study_session(request):
     from studybuddy.forms import NewStuddyGroupForm
+
+    user = SM.getUser(request.session)
+    if not user:
+        print "no user"
+        return HttpResponse(json.dumps({'status':'error','reason':'invalid user'}),content_type="application/json")
 
     form = NewStuddyGroupForm(request.POST)
     if form.is_valid():
         # continue adding
-
+        print "form valid"
         try:
             var = form.cleaned_data
             loc = Location.create_or_get(var['here_id'],var['place_name'],(var['longitude'],var['latitude']))
@@ -117,18 +127,19 @@ def create_study_session(request):
             sg = StudyGroup(name=var['name'],
                             maxMembers=var['maxMembers'],
                             description=var['description'],
-                            isPrivate=var['isPrivate'],
-                            creator=request.user,
+                            creator=user,
                             location=loc,
-                            datetime=var['datetime']
-                            targetInterest=StudyInterest.getByID(var['targetInterest']),
-                            targetChannels=InterestChannel.getByIDs(var['targetChannels']))
+                            datetime=var['datetime'],
+                            targetInterest=StudyInterest.getByName(var['targetInterest']),
+                            targetChannels=InterestChannel.getByNames(var['targetChannels']))
             
             sg.save()
-
+            print "success"
+            return HttpResponse(json.dumps({'status':'success'}),content_type="application/json")
         except Exception, e:
             import logging
             logging.exception(e)
     else:
+        print request.POST
         print form.errors
         # return error

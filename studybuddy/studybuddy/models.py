@@ -5,9 +5,9 @@ class InterestChannel(models.Model):
     name = models.CharField(max_length=32)
 
     @classmethod
-    def getByIDs(cls, ids):
+    def getByNames(cls, names):
         try:
-            return cls.objects.filter(id__in=ids)
+            return cls.objects.filter(name__in=names)
         except Exception, e:
             import logging
             logging.exception(e)
@@ -22,9 +22,9 @@ class StudyInterest(models.Model):
         return cls.objects.filter(name__contains=keyword)
 
     @classmethod
-    def getByID(cls, id):
+    def getByName(cls, name):
         try:
-            return cls.objects.get(id=id)
+            return cls.objects.get(name=name)
         except Exception, e:
             import logging
             logging.exception(e)
@@ -95,8 +95,8 @@ class User(models.Model):
 class Location(models.Model):
     name = models.CharField(max_length=32)
     here_id = models.CharField(max_length=64, unique=True)
-    lng = models.DecimalField(max_digits=5)
-    lat = models.DecimalField(max_digits=5)
+    lng = models.DecimalField(max_digits=8,decimal_places=5)
+    lat = models.DecimalField(max_digits=8,decimal_places=5)
 
     @classmethod
     def create_or_get(cls, here_id, name, long_lat):
@@ -106,7 +106,7 @@ class Location(models.Model):
         except ObjectDoesNotExist:
             # create new instance of Location
             try:
-                new_location = Location(name=name, here_id=here_id, lng=long_lat[0], lng=long_lat[1])
+                new_location = Location(name=name, here_id=here_id, lng=long_lat[0], lat=long_lat[1])
                 new_location.save()
 
                 return new_location
@@ -124,7 +124,6 @@ class StudyGroup(models.Model):
     targetInterest = models.ForeignKey(StudyInterest)
     targetChannels = models.ManyToManyField(InterestChannel)
     members = models.ManyToManyField(User, related_name='members')
-    isPrivate = models.BooleanField(default=False)
     creationTime = models.DateTimeField(auto_now_add=True)
 
 class Notification(models.Model):
