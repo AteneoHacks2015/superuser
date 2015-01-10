@@ -51,6 +51,10 @@ class StudyInterest(models.Model):
     description = models.TextField()
     channels = models.ManyToManyField(InterestChannel)
 
+    @classmethod
+    def searchByName(cls, keyword):
+        return cls.objects.filter(name__contains=keyword)
+
 class StudyGroup(models.Model):
     maxMembers = models.IntegerField()
     description = models.TextField()
@@ -58,7 +62,7 @@ class StudyGroup(models.Model):
     location = models.TextField()
     datetime = models.DateTimeField()
     targetInterest = models.ForeignKey(StudyInterest)
-    targetChannels = models.ManyToManyField(InterestChannel, null=True, blank=True)
+    targetChannels = models.ManyToManyField(InterestChannel)
     members = models.ManyToManyField(User, related_name='members')
     isPrivate = models.BooleanField(default=False)
     creationTime = models.DateTimeField(auto_now_add=True)
