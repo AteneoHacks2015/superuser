@@ -1,5 +1,17 @@
 from django.db import models
 
+class InterestChannel(models.Model):
+    name = models.CharField(max_length=32)
+
+class StudyInterest(models.Model):
+    name = models.CharField(max_length=128)
+    description = models.TextField()
+    channels = models.ManyToManyField(InterestChannel)
+
+    @classmethod
+    def searchByName(cls, keyword):
+        return cls.objects.filter(name__contains=keyword)
+
 class User(models.Model):
     username = models.CharField(max_length=32, unique=True)
     fullname = models.CharField(max_length=128)
@@ -8,6 +20,7 @@ class User(models.Model):
     phone = models.CharField(max_length=32)
     university = models.CharField(max_length=128, blank=True, null=True)
     creationTime = models.DateTimeField(auto_now_add=True)
+    interests = models.ManyToManyField(StudyInterest)
 
     # Instance Methods
 
@@ -20,6 +33,16 @@ class User(models.Model):
         import hashlib
         if hashlib.md5(password).hexdigest() == self.password: return True
         return False
+
+    def addStudyInterest(self, name):
+        query = StudyInterest.objects.filter(name=name)
+        if query.count() > 0:
+            self.interests.add(query.get())
+        else:
+            newInterest = StudyInterest(name=name, description=name).save()
+            self.interests.add(newInterest)
+
+        self.save()
 
     # Class Methods
 
@@ -41,19 +64,6 @@ class User(models.Model):
         newUser.setPassword(details['password'])
 
         return newUser
-
-
-class InterestChannel(models.Model):
-    name = models.CharField(max_length=32)
-
-class StudyInterest(models.Model):
-    name = models.CharField(max_length=128)
-    description = models.TextField()
-    channels = models.ManyToManyField(InterestChannel)
-
-    @classmethod
-    def searchByName(cls, keyword):
-        return cls.objects.filter(name__contains=keyword)
 
 class StudyGroup(models.Model):
     maxMembers = models.IntegerField()

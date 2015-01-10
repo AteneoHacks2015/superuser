@@ -11,4 +11,5 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^user/create/', 'studybuddy.views.createUser', name='createUser'),
     url(r'^test/', 'studybuddy.views.test'),
+    url(r'^studyinterests/query/', 'studybuddy.views.studyInterestsQuery', name='studyInterestsQuery'),
 )

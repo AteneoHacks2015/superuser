@@ -14,9 +14,53 @@ block page_header
             h3.content-title.pull-left Create account
             // DATE RANGE PICKER
             // /DATE RANGE PICKER
-            .description Sign-up for a free account
+         .description Sign-up for a free account
 
 block page_content
-   .row
-      .col-md-12
-         div Hello
+
+   .col-md-6
+      .box.border.green
+         .box-title
+            h4
+               i.fa-group.fa
+               span Account information
+         .box-body
+            form.form-horizontal(method="POST")
+               {% csrf_token %}
+               label.control-label(for="fullname") Full Name
+               input.form-control(name="fullname", required)
+               label.control-label(for="username") Username
+               input.form-control(name="username", required)
+               label.control-label(for="password") Password
+               input.form-control(name="password", type="password", required)
+               label.control-label(for="email") Email
+               input.form-control(name="email", required)
+               label.control-label(for="phone") Mobile Number
+               input.form-control(name="phone", required)
+               label.control-label(for="university") University (optional)
+               input.form-control(name="university")
+               label.control-label(for="interests") Study Interests
+               input.form-control#interests(type="text", name="interests", data-role="tagsinput")
+               br
+               button.btn.btn-success Create Account
+
+block post_scripts
+   link(rel='stylesheet', type='text/css', href='#{STATIC_URL}tagsinput/bootstrap-tagsinput.css')
+   script(src='#{STATIC_URL}tagsinput/bootstrap-tagsinput.js')
+   script(src='#{STATIC_URL}js/typeahead.js')
+   script(type="text/javascript").
+      var studyInterests = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: '/studyinterests/query/?query=%QUERY',
+      });
+      studyInterests.initialize();
+      $("#interests").tagsinput({
+            typeaheadjs: {
+               name: 'studyInterests',
+               displayKey: 'name',
+               valueKey: 'name',
+               source: studyInterests.ttAdapter()
+            }
+      });
+      $(".bootstrap-tagsinput").addClass("form-control");
