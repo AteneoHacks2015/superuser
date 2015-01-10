@@ -1,0 +1,123 @@
+html(lang='en')
+head
+    meta(http-equiv='content-type', content='text/html; charset=UTF-8')
+    meta(charset='utf-8')
+    title 
+        block title
+    meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no')
+    meta(name='description', content='')
+    meta(name='author', content='')
+    // STYLESHEETS
+    //if lt IE 9
+      script(src='js/flot/excanvas.min.js')
+      script(src='http://html5shiv.googlecode.com/svn/trunk/html5.js')
+      script(src='http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js')
+    link(rel='stylesheet', type='text/css', href='css/cloud-admin.css')
+    link#skin-switcher(rel='stylesheet', type='text/css', href='css/themes/default.css')
+    link(rel='stylesheet', type='text/css', href='css/responsive.css')
+    link(href='font-awesome/css/font-awesome.min.css', rel='stylesheet')
+    link(rel='stylesheet', type='text/css', href='js/bootstrap-daterangepicker/daterangepicker-bs3.css')
+    link(href='http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700', rel='stylesheet', type='text/css')
+    block css
+  body
+    // HEADER
+    header#header.navbar.clearfix
+      .container
+        .navbar-brand
+          // COMPANY LOGO
+          a(href='index.html')
+            img.img-responsive(src='img/logo/logo.png', alt='Cloud Admin Logo', height='30', width='120')
+          // /COMPANY LOGO
+          // TEAM STATUS FOR MOBILE
+          .visible-xs
+            a.team-status-toggle.switcher.btn.dropdown-toggle(href='#')
+              i.fa.fa-users
+          // /TEAM STATUS FOR MOBILE
+          // SIDEBAR COLLAPSE
+          #sidebar-collapse.sidebar-collapse.btn
+            i.fa.fa-bars(data-icon1='fa fa-bars', data-icon2='fa fa-bars')
+          // /SIDEBAR COLLAPSE
+        // NAVBAR LEFT
+        ul#navbar-left.nav.navbar-nav.pull-left.hidden-xs
+        // /NAVBAR LEFT
+        // BEGIN TOP NAVIGATION MENU
+        ul.nav.navbar-nav.pull-right
+          // BEGIN NOTIFICATION DROPDOWN
+          block notifications
+          // END NOTIFICATION DROPDOWN
+          // BEGIN USER LOGIN DROPDOWN
+          li#header-user.dropdown.user
+            a.dropdown-toggle(href='#', data-toggle='dropdown')
+              img(alt='', src='')                        
+              span.username John Doe                        
+              i.fa.fa-angle-down                    
+            ul.dropdown-menu
+              li
+                a(href='#')
+                  i.fa.fa-user
+                  |  My Profile                        
+              li
+                a(href='#')
+                  i.fa.fa-cog
+                  |  Account Settings                        
+              li
+                a(href='#')
+                  i.fa.fa-eye
+                  |  Privacy Settings                        
+              li
+                a(href='login.html')
+                  i.fa.fa-power-off
+                  |  Log Out
+          // END USER LOGIN DROPDOWN
+        // END TOP NAVIGATION MENU
+    // /HEADER
+    // PAGE
+    section#page
+      // SIDEBAR
+      #sidebar.sidebar
+        .sidebar-menu.nav-collapse
+          .divide-20
+          // SEARCH BAR
+          #search-bar
+            input.search(type='text', placeholder='Search')
+            i.fa.fa-search.search-icon
+          // /SEARCH BAR
+          // SIDEBAR MENU
+          ul
+            li
+              a(href='index.html')
+                i.fa.fa-tachometer.fa-fw
+                span.menu-text Dashboard
+      // /SIDEBAR
+      #main-content
+        .container
+          .row
+            #content.col-lg-12
+              // PAGE HEADER
+              .row
+                block page_header
+              // /PAGE HEADER
+              .row
+                block page_content
+    // /PAGE
+    // JAVASCRIPTS
+    // Placed at the end of the document so the pages load faster
+    // JQUERY
+    script(src='js/jquery/jquery-2.0.3.min.js')
+    // JQUERY UI
+    script(src='js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js')
+    // BOOTSTRAP
+    script(src='bootstrap-dist/js/bootstrap.min.js')
+    // DATE RANGE PICKER
+    script(src='js/bootstrap-daterangepicker/moment.min.js')
+    script(src='js/bootstrap-daterangepicker/daterangepicker.min.js')
+    // SLIMSCROLL
+    script(type='text/javascript', src='js/jQuery-slimScroll-1.3.0/jquery.slimscroll.min.js')
+    script(type='text/javascript', src='js/jQuery-slimScroll-1.3.0/slimScrollHorizontal.min.js')
+    // COOKIE
+    script(type='text/javascript', src='js/jQuery-Cookie/jquery.cookie.min.js')
+    // CUSTOM SCRIPT
+    script(src='js/script.js')
+    script.
+
+    block post_scripts
