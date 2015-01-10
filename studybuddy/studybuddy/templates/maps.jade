@@ -21,7 +21,7 @@ block page_content
    //- br
    .col-md-4(style='padding-left:30px;')
       .row
-         form.form-inline#search-form(role='form', action="/test")
+         form.form-inline#search-form(role='form')
             .form-group
                input.form-control#search-query(type='text',placeholder='Search Place to Study')
             .form-group
@@ -87,6 +87,7 @@ block post_scripts
    script(src='#{STATIC_URL}tagsinput/bootstrap-tagsinput.js')
    script(src='#{STATIC_URL}js/typeahead.js')
    script(src='#{STATIC_URL}js/jquery.datetimepicker.js')
+   script(src="#{STATIC_URL}js/jquery.noty.packaged.min.js")
 
    script
       var studyInterests = new Bloodhound({
@@ -186,6 +187,29 @@ block post_scripts
                   });
                   // show info bubble
                   ui.addBubble(bubble);
+                  var omgobj = {"here_id": data_.res.id};
+
+                  $.ajax({
+                     url: '/study_sessions/query/',
+                     type: 'get',
+                     data: omgobj,
+                     success: function(data_){
+                        $("#reserved-sessions-here").html();
+                        var sessions_html = "";
+                        for (i=0; i< data_.length; i++){
+                           var data = data_[i];
+                           console.log(data);
+                           sessions_html += data.name+" ("+data.interest+
+                           ")<br/>Host: "+data.host+"<br/>Sched: "+data.datetime+"<br/>----------------<br/>";
+                           console.log(sessions_html);
+                        }
+                        $("#reserved-sessions-here").html(sessions_html);
+                     },
+                     error: function(){
+                        console.log('error loading sessions_html');
+                     }
+                  })
+
                }, false);
 
                console.log(data);
@@ -199,8 +223,10 @@ block post_scripts
                   // add marker on map
                   addMarkerToGroup(group, {lat: result.position[0], lng:result.position[1]},
                      {'res':result,'title':result.title+ ", " + result.vicinity.split('<br/>')[0] ,
-                     'html':'<div style="width:180px;padding:2px 5px"><h4>'+ result.title + '</h4><span class="infobubble-vicinity">'+result.vicinity+
-                     '<span><br/><a href="#create-session-modal" data-target="#create-session-modal" data-toggle="modal">Plan a study session here!</a></div>'});
+                     'html':'<div style="width:180px;padding:2px 5px"><h4>'+ result.title + '</h4><div id="reserved-sessions-here"></div>'+
+                     '<br/><span class="infobubble-vicinity">'+result.vicinity+
+                     '<span><br/><a href="#create-session-modal" data-target="#create-session-modal"'+
+                     'data-toggle="modal">Plan a study session here!</a></div>'});
                }
                map.setViewBounds(group.getBounds());
                
@@ -245,6 +271,7 @@ block post_scripts
             data: paramObj,
             success: function(data){
                console.log(data);
+               window.location = '/map/?success=true&search='+ encodeURIComponent($("#search-query").val());
             },
             error: function(){
                console.log('error')
@@ -252,9 +279,48 @@ block post_scripts
          });
       });
 
+      function getUrlParameter(sParam){
+          var sPageURL = window.location.search.substring(1);
+          var sURLVariables = sPageURL.split('&');
+          for (var i = 0; i < sURLVariables.length; i++) 
+          {
+              var sParameterName = sURLVariables[i].split('=');
+              if (sParameterName[0] == sParam) 
+              {
+                  return sParameterName[1];
+              }
+          }
+      }   
+
+      $(document).ready(function(){
+         // check if search exist, if so search it
+         try{
+            var query = decodeURIComponent(getUrlParameter("search"));
+
+            if (query != 'undefined'){
+               $("#search-query").val(query);
+               doSearch();
+            }
+
+            var success = decodeURIComponent(getUrlParameter("success"));
+            if (success === 'true'){
+               var n = noty({
+                  text: 'Successfully created a new study session',
+                  animation: {
+                       open: {height: 'toggle'}, // jQuery animate function property object
+                       close: {height: 'toggle'}, // jQuery animate function property object
+                       easing: 'swing', // easing
+                       speed: 500 // opening & closing animation speed
+                   }
+               });
+            }
+         }catch(err){}
+
+      });
 block css   
    link(rel='stylesheet', type='text/css', href='#{STATIC_URL}css/jquery.datetimepicker.css')
    link(rel='stylesheet', type='text/css', href='#{STATIC_URL}tagsinput/bootstrap-tagsinput.css')
    style
       span.infobubble-vicinity{font-size: 12px;}
       .modal-body{padding: 5px 70px}
+      #reserved-sessions-here{font-size: 10px}

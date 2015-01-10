@@ -19,6 +19,21 @@ class InterestChannel(models.Model):
 
         return interest.channels.filter(name__contains=keyword)
 
+    @classmethod
+    def create_or_get(cls, name):
+        try:
+            return cls.objects.get(name=name)
+        except ObjectDoesNotExist:
+            try:
+                ic = InterestChannel(name=name)
+                ic.save()
+                print name," created as new InterestChannel"
+                
+                return ic
+            except Exception, e:
+                import logging
+                logging.expcetion(e)
+
 class StudyInterest(models.Model):
     name = models.CharField(max_length=128)
     description = models.TextField()

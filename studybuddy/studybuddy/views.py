@@ -1,4 +1,5 @@
 from studybuddy.models import *
+from django.core.exceptions import ObjectDoesNotExist
 from studybuddy.utils import get_client_ip, ip_to_location
 from datetime import date, datetime, time, timedelta
 from django.shortcuts import render, redirect
@@ -170,10 +171,14 @@ def create_study_session(request):
                             creator=user,
                             location=loc,
                             datetime=var['datetime'],
-                            targetInterest=StudyInterest.getByName(var['targetInterest']),
-                            targetChannels=InterestChannel.getByNames(var['targetChannels']))
+                            targetInterest=StudyInterest.getByName(var['targetInterest']))
             
             sg.save()
+
+            for channel in var['targetChannels'].split(' '):
+                tc = InterestChannel.create_or_get(channel)
+                sg.targetChannels.add(tc)
+
             print "success"
             return HttpResponse(json.dumps({'status':'success'}),content_type="application/json")
         except Exception, e:
@@ -183,3 +188,26 @@ def create_study_session(request):
         print request.POST
         print form.errors
         # return error
+
+def get_study_sessions(request):
+    from datetime import datetime
+    from django.utils import timezone
+    try:
+        here_id = request.GET.get('here_id')
+        place = Location.objects.get(here_id=here_id)
+        sgs = StudyGroup.objects.filter(location=place).exclude(datetime__lt=timezone.now())
+        resp = []
+
+        for sg in sgs:
+            resp.append({'name':sg.name, 'datetime': datetime.strftime(sg.datetime,'%y/%m/%d %H:%M'), 'interest': sg.targetInterest.name, 'host': sg.creator.username})
+
+        print resp
+        return HttpResponse(json.dumps(resp),content_type="application/json")
+
+    except ObjectDoesNotExist:
+        pass
+    except Exception, e:
+        import logging
+        logging.exception(e)
+    
+    return HttpResponse(json.dumps([]),content_type="application/json")      
