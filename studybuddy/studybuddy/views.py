@@ -4,6 +4,7 @@ types of events:
 '''
 
 from studybuddy.models import *
+from django.core.exceptions import ObjectDoesNotExist
 from studybuddy.utils import get_client_ip, ip_to_location
 from datetime import date, datetime, time, timedelta
 from django.shortcuts import render, redirect
@@ -48,7 +49,7 @@ def createUser(request):
         if user:
             for interest in request.POST.get("interests").split(","):
                 user.addStudyInterest(interest)
-            return redirect("/user/create/")
+            return redirect("/dashboard/")
 
         return HttpResponse("Something went wrong!")
 
@@ -57,10 +58,10 @@ def loginUser(request):
         return render(request, "user_login.jade")
     else:
         SM.login(request.session, request.POST)
-        return redirect("/")
+        return redirect("/dashboard/")
 def logoutUser(request):
     SM.logout(request.session)
-    return redirect("/")
+    return redirect("/login/")
 
 # AJAX Query Endpoints #####################################################################
 
@@ -72,6 +73,46 @@ def studyInterestsQuery(request):
         result_list.append({"name": result.name, "id": result.id})
 
     return HttpResponse(json.dumps(result_list))
+
+def interestChannelsQuery(request):
+    results = InterestChannel.searchByName(request.GET.get("query"), request.GET.get("interest"))
+    result_list = []
+    for result in results:
+        result_list.append({"name": result.name, "id": result.id})
+
+    return HttpResponse(json.dumps(result_list))
+
+def userInterestChannelsQuery(request):
+    user = SM.getUser(request.session)
+    if not user:
+        return HttpResponse("[]")
+
+    else:
+        userCHList = []
+        try:
+            for CH in user.channels.all():
+                if CH in StudyInterest.objects.get(id=request.GET.get("interest")).channels.all():
+                    userCHList.append({"id": CH.id, "name": CH.name})
+            return HttpResponse(json.dumps(userCHList))
+        except Exception, e:
+            return HttpResponse("Error. %s"%e)
+
+def userInterestChannelsUpdate(request):
+    print json.dumps(request.POST)
+    try:
+        user = SM.getUser(request.session)
+        if not user:
+            return HttpResponse("Bad request.")
+
+        if "addition" in request.POST and request.POST.get("addition") != "":
+            for add in request.POST.get("addition").split(","):
+                user.addInterestChannel(add, request.POST.get("interest"))
+        if "removal" in request.POST and request.POST.get("removal") != "":
+            for remove in request.POST.get("removal"):
+                user.removeInterestChannel(remove)
+        return HttpResponse("OK")
+    except Exception, e:
+        return HttpResponse("Error. %s"%e)
 
 def userStudyInterestsQuery(request):
     user = SM.getUser(request.session)
@@ -112,6 +153,29 @@ def view_maps(request):
 
     return render(request, "maps.jade", vars_)
 
+def get_study_sessions(request):
+    from datetime import datetime
+    from django.utils import timezone
+    try:
+        here_id = request.GET.get('here_id')
+        place = Location.objects.get(here_id=here_id)
+        sgs = StudyGroup.objects.filter(location=place).exclude(datetime__lt=timezone.now())
+        resp = []
+
+        for sg in sgs:
+            resp.append({'name':sg.name, 'datetime': datetime.strftime(sg.datetime,'%y/%m/%d %H:%M'), 'interest': sg.targetInterest.name, 'host': sg.creator.username})
+
+        print resp
+        return HttpResponse(json.dumps(resp),content_type="application/json")
+
+    except ObjectDoesNotExist:
+        pass
+    except Exception, e:
+        import logging
+        logging.exception(e)
+    
+    return HttpResponse(json.dumps([]),content_type="application/json")  
+
 @require_POST
 @csrf_exempt
 def create_study_session(request):
@@ -136,8 +200,7 @@ def create_study_session(request):
                             creator=user,
                             location=loc,
                             datetime=var['datetime'],
-                            targetInterest=StudyInterest.getByName(var['targetInterest']),
-                            targetChannels=InterestChannel.getByNames(var['targetChannels']))
+                            targetInterest=StudyInterest.getByName(var['targetInterest']))
             
             sg.save()
 
@@ -151,6 +214,10 @@ def create_study_session(request):
                 }
 
                 redis_server.publish("interest-%s.channel-%s"%(d['interest_name'], d['channel_name']), d)
+
+            for channel in var['targetChannels'].split(' '):
+                tc = InterestChannel.create_or_get(channel)
+                sg.targetChannels.add(tc)
 
             print "success"
             return HttpResponse(json.dumps({'status':'success'}),content_type="application/json")
@@ -206,4 +273,4 @@ def channel_listener_callback(message):
     event_handler[data['type']](**data)
 
     print 'data!'
-    print data
+    print data    
