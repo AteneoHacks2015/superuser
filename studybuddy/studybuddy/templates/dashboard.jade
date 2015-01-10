@@ -1,0 +1,112 @@
+extends ./base.jade
+
+block page_header
+   .col-sm-12
+      .page-header
+         // BREADCRUMBS
+         ul.breadcrumb
+            li
+               i.fa.fa-home
+               a(href='index.html') Home
+            li User Dashboard
+         // BREADCRUMBS
+         .clearfix
+            h3.content-title.pull-left Dashboard
+            // DATE RANGE PICKER
+            // /DATE RANGE PICKER
+         .description Manage your StudyBuddy account
+
+block page_content
+
+   .col-md-6
+      .box.border.green
+         .box-title
+            h4
+               i.fa-star.fa
+               span Study Group
+         .box-body
+            a.btn.btn-success.btn-large.btn-block
+               i.fa.fa-search
+               | &nbsp;Find a Study Group
+            a.btn.btn-success.btn-large.btn-block
+               i.fa.fa-pencil
+               | &nbsp;Create a Study Group
+
+   .col-md-6
+      .box.border.blue
+         .box-title
+            h4
+               i.fa-tags.fa
+               span Study Interests
+         .box-body
+            .row
+               .col-md-12
+                  | Your existing Study Interests.
+                  br
+                  #SI-container
+            br
+            .row
+               .col-md-12
+                  | Add new Study Interests.
+                  input.form-control#interests(type="text")
+                  button.btn.btn-info#saveSI Save
+
+block post_scripts
+   link(rel='stylesheet', type='text/css', href='#{STATIC_URL}tagsinput/bootstrap-tagsinput.css')
+   script(src='#{STATIC_URL}tagsinput/bootstrap-tagsinput.js')
+   script(src='#{STATIC_URL}js/typeahead.js')
+   script(type="text/javascript").
+      $(document).ready(function() {
+         var studyInterests = new Bloodhound({
+           datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+           queryTokenizer: Bloodhound.tokenizers.whitespace,
+           remote: '/studyinterests/query/?query=%QUERY',
+         });
+         studyInterests.initialize();
+         $("#interests").tagsinput({
+               typeaheadjs: {
+                  name: 'studyInterests',
+                  displayKey: 'name',
+                  valueKey: 'name',
+                  source: studyInterests.ttAdapter()
+               }
+         });
+         $(".bootstrap-tagsinput").addClass("form-control");
+         window.SIremovalList = [];
+
+         $.ajax(
+            {
+               url: "/studyinterests/queryuser/",
+               async: false,
+               dataType: "json",
+               success: function(data) {
+                  _.forEach(data, function(value, index) {
+                     $("#SI-container").append("<span class='label label-info' id='SI-"+ value.id +"'>" + value.name + "&nbsp;<a href='#' class='SI-remove' data-SI-id='"+ value.id +"'>&times;</a>");
+                     $("#SI-container").append("&nbsp;");
+                  });
+               }
+         });
+
+         $(".SI-remove").click(function(e) {
+            e.preventDefault();
+            var SIid = $(this).attr('data-SI-id');
+            $("#SI-"+SIid).remove();
+            window.SIremovalList.push(SIid);
+            });
+
+         $("#saveSI").click(function() {
+            console.log(window.SIremovalList);
+            $.ajax({
+               type: "POST",
+               url: "/studyinterests/update/",
+               data: {
+                  csrfmiddlewaretoken: "{{csrf_token}}",
+                  removal: window.SIremovalList.join(","),
+                  addition: $("#interests").val()
+               },
+               success: function(data) {
+                  if (data == 'OK') window.location.reload();
+               }
+               });
+            })
+         });

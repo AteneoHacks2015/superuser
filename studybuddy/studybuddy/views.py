@@ -14,6 +14,7 @@ def test(request):
     send_sms.delay(number='639474325719', message='hi kix', message_id=message_id)
     return HttpResponse()
 
+# User Account Views #####################################################################
 def createUser(request):
     if request.method == 'GET':
         return render(request, "user_create.jade")
@@ -46,6 +47,8 @@ def logoutUser(request):
     SM.logout(request.session)
     return redirect("/")
 
+# AJAX Query Endpoints #####################################################################
+
 def studyInterestsQuery(request):
     results = StudyInterest.searchByName(request.GET.get("query"))
     result_list = []
@@ -54,12 +57,46 @@ def studyInterestsQuery(request):
 
     return HttpResponse(json.dumps(result_list))
 
+def userStudyInterestsQuery(request):
+    user = SM.getUser(request.session)
+    if not user:
+        return HttpResponse("[]")
+
+    else:
+        userSIList = []
+        for SI in user.interests.all():
+            userSIList.append({"id": SI.id, "name":SI.name})
+        return HttpResponse(json.dumps(userSIList))
+
+def userStudyInterestsUpdate(request):
+    print json.dumps(request.POST)
+    try:
+        user = SM.getUser(request.session)
+        if not user:
+            return HttpResponse("Bad request.")
+
+        else:
+            if "removal" in request.POST and request.POST.get("removal") != "":
+                for remove in request.POST.get("removal").split(","):
+                    user.removeStudyInterest(remove)
+            if "addition" in request.POST and request.POST.get("addition") != "":
+                for add in request.POST.get("addition").split(","):
+                    user.addStudyInterest(add)
+    except Exception, e:
+        return HttpResponse("Error. %s"%e)
+    return HttpResponse("OK")
+
 def create_study_session(request):
     ip_address = get_client_ip(request)
     lng, lat = ip_to_location(ip_address, default=True)
 
-    vars_ = {'lng': lng, 
+    vars_ = {'lng': lng,
              'lat': lat,
              'ip_address': ip_address}
 
     return render(request, "maps.jade", vars_)
+
+# Dashboard #####################################################################
+
+def dashboardMain(request):
+    return render(request, "dashboard.jade")
