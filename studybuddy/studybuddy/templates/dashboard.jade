@@ -17,7 +17,6 @@ block page_header
          .description Manage your StudyBuddy account
 
 block page_content
-
    .col-md-6
       .box.border.green
          .box-title
@@ -43,13 +42,35 @@ block page_content
                .col-md-12
                   | Your existing Study Interests.
                   br
-                  #SI-container
+                  h4#SI-container
             br
             .row
                .col-md-12
                   | Add new Study Interests.
                   input.form-control#interests(type="text")
                   button.btn.btn-info#saveSI Save
+
+   #channelsModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+      .modal-dialog
+          .modal-content
+            .modal-header
+               button.close(type='button', data-dismiss='modal')
+                  span(aria-hidden='true') &times;
+                  span.sr-only Close
+               h4#channelsModalTitle.modal-title Modal title
+            .modal-body
+               .row
+                  .col-md-12
+                     | You are currently subscribed to the following channels under this Study Interest:
+                     h4#channels-container
+                  br
+                  .col-md-12
+                     | Create and/or subscribe to channels:
+                     input.form-control#channels(type="text")
+            .modal-footer
+               button.btn.btn-default(type='button', data-dismiss='modal') Close
+               button#saveCH.btn.btn-primary(type='button', data-dismiss='modal') Save changes
+
 
 block post_scripts
    link(rel='stylesheet', type='text/css', href='#{STATIC_URL}tagsinput/bootstrap-tagsinput.css')
@@ -81,7 +102,7 @@ block post_scripts
                dataType: "json",
                success: function(data) {
                   _.forEach(data, function(value, index) {
-                     $("#SI-container").append("<span class='label label-info' id='SI-"+ value.id +"'>" + value.name + "&nbsp;<a href='#' class='SI-remove' data-SI-id='"+ value.id +"'>&times;</a>");
+                     $("#SI-container").append("<span class='label label-info SItag' id='SI-"+ value.id +"'>" + value.name + "&nbsp;<a href='#' class='SI-remove' data-SI-id='"+ value.id +"'>&times;</a>");
                      $("#SI-container").append("&nbsp;");
                   });
                }
@@ -108,5 +129,63 @@ block post_scripts
                   if (data == 'OK') window.location.reload();
                }
                });
-            })
+            });
+
+         $(".SItag").click(function(){
+            var SIid = $(this).attr('id').split("-")[1];
+            window.SIid_curr = SIid;
+            $("#channelsModal").modal();
+            $("#channels-container").html("");
+            $.ajax({
+               type: "GET",
+               dataType: "json",
+               url: "/user/channels/query/?interest=" + SIid,
+               success: function(data) {
+                  console.log(data);
+                  _.forEach(data, function(value, index) {
+                     $("#channels-container").append("<span class='label label-info CHtag' id='CH-"+ value.id +"'>" + value.name + "&nbsp;<a href='#' class='CH-remove' data-CH-id='"+ value.id +"'>&times;</a>");
+                     $("#channels-container").append("&nbsp;");
+                  });
+                  window.CHremovalList = [];
+                  $(".CH-remove").click(function(e) {
+                     var CHid = $(this).attr('data-CH-id');
+                     $("#CH-"+CHid).remove();
+                     window.CHremovalList.push(CHid);
+                  });
+               }
+               });
+
+            var interestChannels = new Bloodhound({
+              datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+              queryTokenizer: Bloodhound.tokenizers.whitespace,
+              remote: '/interestchannels/query/?interest='+ SIid +'&query=%QUERY',
+            });
+            interestChannels.initialize();
+            $("#channels").tagsinput({
+                  typeaheadjs: {
+                     name: 'interestChannels',
+                     displayKey: 'name',
+                     valueKey: 'name',
+                     source: interestChannels.ttAdapter()
+                  }
+            });
+            $(".bootstrap-tagsinput").addClass("form-control");
+
+         });
+
+         $("#saveCH").click(function() {
+            $.ajax({
+               url: "/user/channels/update/",
+               type: "POST",
+               data: {
+                  csrfmiddlewaretoken: "{{csrf_token}}",
+                  interest: window.SIid_curr,
+                  addition: $("#channels").val(),
+                  removal: window.CHremovalList.join(",")
+               },
+               success: function(data) {
+                  $("#channels").val("");
+               }
+               })
+         });
          });

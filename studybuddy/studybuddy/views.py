@@ -37,7 +37,7 @@ def createUser(request):
         if user:
             for interest in request.POST.get("interests").split(","):
                 user.addStudyInterest(interest)
-            return redirect("/user/create/")
+            return redirect("/dashboard/")
 
         return HttpResponse("Something went wrong!")
 
@@ -46,10 +46,10 @@ def loginUser(request):
         return render(request, "user_login.jade")
     else:
         SM.login(request.session, request.POST)
-        return redirect("/")
+        return redirect("/dashboard/")
 def logoutUser(request):
     SM.logout(request.session)
-    return redirect("/")
+    return redirect("/login/")
 
 # AJAX Query Endpoints #####################################################################
 
@@ -61,6 +61,46 @@ def studyInterestsQuery(request):
         result_list.append({"name": result.name, "id": result.id})
 
     return HttpResponse(json.dumps(result_list))
+
+def interestChannelsQuery(request):
+    results = InterestChannel.searchByName(request.GET.get("query"), request.GET.get("interest"))
+    result_list = []
+    for result in results:
+        result_list.append({"name": result.name, "id": result.id})
+
+    return HttpResponse(json.dumps(result_list))
+
+def userInterestChannelsQuery(request):
+    user = SM.getUser(request.session)
+    if not user:
+        return HttpResponse("[]")
+
+    else:
+        userCHList = []
+        try:
+            for CH in user.channels.all():
+                if CH in StudyInterest.objects.get(id=request.GET.get("interest")).channels.all():
+                    userCHList.append({"id": CH.id, "name": CH.name})
+            return HttpResponse(json.dumps(userCHList))
+        except Exception, e:
+            return HttpResponse("Error. %s"%e)
+
+def userInterestChannelsUpdate(request):
+    print json.dumps(request.POST)
+    try:
+        user = SM.getUser(request.session)
+        if not user:
+            return HttpResponse("Bad request.")
+
+        if "addition" in request.POST and request.POST.get("addition") != "":
+            for add in request.POST.get("addition").split(","):
+                user.addInterestChannel(add, request.POST.get("interest"))
+        if "removal" in request.POST and request.POST.get("removal") != "":
+            for remove in request.POST.get("removal"):
+                user.removeInterestChannel(remove)
+        return HttpResponse("OK")
+    except Exception, e:
+        return HttpResponse("Error. %s"%e)
 
 def userStudyInterestsQuery(request):
     user = SM.getUser(request.session)

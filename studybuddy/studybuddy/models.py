@@ -11,6 +11,13 @@ class InterestChannel(models.Model):
         except Exception, e:
             import logging
             logging.exception(e)
+    def searchByName(cls, keyword, interest):
+        try:
+            interest = StudyInterest.objects.get(id=interest)
+        except StudyInterest.DoesNotExist:
+            return []
+
+        return interest.channels.filter(name__contains=keyword)
 
 class StudyInterest(models.Model):
     name = models.CharField(max_length=128)
@@ -38,6 +45,7 @@ class User(models.Model):
     university = models.CharField(max_length=128, blank=True, null=True)
     creationTime = models.DateTimeField(auto_now_add=True)
     interests = models.ManyToManyField(StudyInterest)
+    channels = models.ManyToManyField(InterestChannel)
 
     # Instance Methods
 
@@ -68,6 +76,32 @@ class User(models.Model):
             return False
 
         self.interests.remove(interest)
+        self.save()
+
+    def addInterestChannel(self, name, interest):
+        try:
+            interest = StudyInterest.objects.get(id=interest)
+        except StudyInterest.DoesNotExist:
+            return False
+
+        try:
+            channel = interest.channels.get(name=name)
+        except InterestChannel.DoesNotExist:
+            channel = InterestChannel(name=name)
+            channel.save()
+            interest.channels.add(channel)
+            interest.save()
+
+        self.channels.add(channel)
+        self.save()
+
+    def removeInterestChannel(self, id):
+        try:
+            channel = self.channels.get(id=id)
+        except InterestChannel.DoesNotExist:
+            return False
+
+        self.channels.remove(channel)
         self.save()
 
 
@@ -102,7 +136,7 @@ class Location(models.Model):
     def create_or_get(cls, here_id, name, long_lat):
         try:
             return Location.objects.get(here_id=here_id)
-            
+
         except ObjectDoesNotExist:
             # create new instance of Location
             try:
@@ -112,7 +146,7 @@ class Location(models.Model):
                 return new_location
             except Exception, e:
                 import logging
-                logging.exception(e)           
+                logging.exception(e)
 
 class StudyGroup(models.Model):
     name = models.CharField(max_length=32)
