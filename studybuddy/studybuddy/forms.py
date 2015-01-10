@@ -6,8 +6,7 @@ class NewStuddyGroupForm(forms.Form):
 	description = forms.CharField(max_length=255,required=False)
 	datetime = forms.DateTimeField(input_formats=['%Y/%m/%d %H:%M'])
 	targetInterest = forms.CharField(max_length=255)
-	targetChannels = forms.CharField(max_length=255) #array of channel ids
-	# members = forms.MultipleChoiceField(required=False)
+	targetChannels = forms.CharField(max_length=255) 
 
 	#auxilary information not needed by StudyGroup model
 	#but needed in case new Location is to be created
