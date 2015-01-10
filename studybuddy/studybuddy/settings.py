@@ -51,6 +51,13 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+TEMPLATE_LOADERS = (
+    ('pyjade.ext.django.Loader',(
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )),
+)
+
 ROOT_URLCONF = 'studybuddy.urls'
 
 WSGI_APPLICATION = 'studybuddy.wsgi.application'

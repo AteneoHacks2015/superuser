@@ -2,7 +2,7 @@ html(lang='en')
   head
     meta(http-equiv='content-type', content='text/html; charset=UTF-8')
     meta(charset='utf-8')
-    title 
+    title
         block title
     meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no')
     meta(name='description', content='')
@@ -12,9 +12,9 @@ html(lang='en')
     script(src='#{STATIC_URL}js/flot/excanvas.min.js')
     script(src='http://html5shiv.googlecode.com/svn/trunk/html5.js')
     script(src='http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js')
-    link(rel='stylesheet', type='text/css', href='css/cloud-admin.css')
-    link#skin-switcher(rel='stylesheet', type='text/css', href='css/themes/default.css')
-    link(rel='stylesheet', type='text/css', href='css/responsive.css')
+    link(rel='stylesheet', type='text/css', href='#{STATIC_URL}css/cloud-admin.css')
+    link#skin-switcher(rel='stylesheet', type='text/css', href='#{STATIC_URL}css/themes/default.css')
+    link(rel='stylesheet', type='text/css', href='#{STATIC_URL}css/responsive.css')
     link(href='#{STATIC_URL}font-awesome/css/font-awesome.min.css', rel='stylesheet')
     link(rel='stylesheet', type='text/css', href='#{STATIC_URL}js/bootstrap-daterangepicker/daterangepicker-bs3.css')
     link(href='http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700', rel='stylesheet', type='text/css')
@@ -48,22 +48,22 @@ html(lang='en')
           // BEGIN USER LOGIN DROPDOWN
           li#header-user.dropdown.user
             a.dropdown-toggle(href='#', data-toggle='dropdown')
-              img(alt='', src='#{STATIC_URL}')                        
-              span.username John Doe                        
-              i.fa.fa-angle-down                    
+              img(alt='', src='#{STATIC_URL}')
+              span.username John Doe
+              i.fa.fa-angle-down
             ul.dropdown-menu
               li
                 a(href='#')
                   i.fa.fa-user
-                  |  My Profile                        
+                  |  My Profile
               li
                 a(href='#')
                   i.fa.fa-cog
-                  |  Account Settings                        
+                  |  Account Settings
               li
                 a(href='#')
                   i.fa.fa-eye
-                  |  Privacy Settings                        
+                  |  Privacy Settings
               li
                 a(href='login.html')
                   i.fa.fa-power-off
