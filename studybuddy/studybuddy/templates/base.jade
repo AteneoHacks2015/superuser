@@ -2,7 +2,8 @@ html(lang='en')
 head
     meta(http-equiv='content-type', content='text/html; charset=UTF-8')
     meta(charset='utf-8')
-    title Cloud Admin | Blank Page
+    title 
+        block title
     meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no')
     meta(name='description', content='')
     meta(name='author', content='')
@@ -16,7 +17,8 @@ head
     link(rel='stylesheet', type='text/css', href='css/responsive.css')
     link(href='font-awesome/css/font-awesome.min.css', rel='stylesheet')
     link(rel='stylesheet', type='text/css', href='js/bootstrap-daterangepicker/daterangepicker-bs3.css')
-    link(href='http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700', rel='stylesheet', type='text/css'){% block css %}{% endblock %}
+    link(href='http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700', rel='stylesheet', type='text/css')
+    block css
   body
     // HEADER
     header#header.navbar.clearfix
@@ -41,7 +43,7 @@ head
         // BEGIN TOP NAVIGATION MENU
         ul.nav.navbar-nav.pull-right
           // BEGIN NOTIFICATION DROPDOWN
-          | {% block notifications %}{% endblock %}
+          block notifications
           // END NOTIFICATION DROPDOWN
           // BEGIN USER LOGIN DROPDOWN
           li#header-user.dropdown.user
@@ -93,10 +95,10 @@ head
             #content.col-lg-12
               // PAGE HEADER
               .row
-                | {% block page_header %}{% endblock %}
+                block page_header
               // /PAGE HEADER
               .row
-                | {% block page_content %}{% endblock %}
+                block page_content
     // /PAGE
     // JAVASCRIPTS
     // Placed at the end of the document so the pages load faster
@@ -117,4 +119,5 @@ head
     // CUSTOM SCRIPT
     script(src='js/script.js')
     script.
-    {% block post_scripts%}{% endblock %}
+
+    block post_scripts
