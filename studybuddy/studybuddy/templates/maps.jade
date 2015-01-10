@@ -8,32 +8,18 @@ block page_header
             li
                i.fa.fa-home
                a(href='index.html') Home
-            li Dashboard
+            li Map
          // /BREADCRUMBS
-         .clearfix
-            h3.content-title.pull-left Dashboard
-            // DATE RANGE PICKER
-            span.date-range.pull-right
-               .btn-group
-                 a.js_update.btn.btn-default(href='#') Today
-                  a.js_update.btn.btn-default(href='#') Last 7 Days
-                  a.js_update.btn.btn-default.hidden-xs(href='#') Last month
-                  a#reportrange.btn.reportrange
-                     i.fa.fa-calendar
-                     span
-                    
-                     i.fa.fa-angle-down
-            // /DATE RANGE PICKER
          .description Overview, Statistics and more
 
 block page_content
-   span
-      | your ip address is {{ ip_address }}
-   br
-   span
-      | your geolocation is {{ lng }}, {{ lat }}
-   br
-   .col-md-4(style='padding-left:30px;border:1px solid;')
+   //- span
+   //-    | your ip address is {{ ip_address }}
+   //- br
+   //- span
+   //-    | your geolocation is {{ lng }}, {{ lat }}
+   //- br
+   .col-md-4(style='padding-left:30px;')
       .row
          form.form-inline#search-form(role='form', action="/test")
             .form-group
@@ -41,7 +27,7 @@ block page_content
             .form-group
                button#location-search(type='button',class='btn btn-success')
                   | Search
-      .row(style='border:solid 1px;')
+      .row
 
    .col-md-8
       #map(style='width: 99%; height: 400px; background: grey; margin-right: 1%')
