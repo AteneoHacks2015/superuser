@@ -1,7 +1,16 @@
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 
 class InterestChannel(models.Model):
     name = models.CharField(max_length=32)
+
+    @classmethod
+    def getByIDs(cls, ids):
+        try:
+            return cls.objects.filter(id__in=ids)
+        except Exception, e:
+            import logging
+            logging.exception(e)
 
 class StudyInterest(models.Model):
     name = models.CharField(max_length=128)
@@ -11,6 +20,14 @@ class StudyInterest(models.Model):
     @classmethod
     def searchByName(cls, keyword):
         return cls.objects.filter(name__contains=keyword)
+
+    @classmethod
+    def getByID(cls, id):
+        try:
+            return cls.objects.get(id=id)
+        except Exception, e:
+            import logging
+            logging.exception(e)
 
 class User(models.Model):
     username = models.CharField(max_length=32, unique=True)
@@ -77,12 +94,29 @@ class User(models.Model):
 
 class Location(models.Model):
     name = models.CharField(max_length=32)
-    here_id = models.CharField(max_length=64)
+    here_id = models.CharField(max_length=64, unique=True)
     lng = models.DecimalField(max_digits=5)
     lat = models.DecimalField(max_digits=5)
 
+    @classmethod
+    def create_or_get(cls, here_id, name, long_lat):
+        try:
+            return Location.objects.get(here_id=here_id)
+            
+        except ObjectDoesNotExist:
+            # create new instance of Location
+            try:
+                new_location = Location(name=name, here_id=here_id, lng=long_lat[0], lng=long_lat[1])
+                new_location.save()
+
+                return new_location
+            except Exception, e:
+                import logging
+                logging.exception(e)           
+
 class StudyGroup(models.Model):
-    maxMembers = models.IntegerField()
+    name = models.CharField(max_length=32)
+    maxMembers = models.IntegerField()  # set to 0 for unlimited
     description = models.TextField()
     creator = models.ForeignKey(User, related_name='creator')
     location = models.ForeignKey(Location)

@@ -3,6 +3,7 @@ from studybuddy.utils import get_client_ip, ip_to_location
 from datetime import date, datetime, time, timedelta
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.views.decorators.http import require_POST
 from studybuddy.models import *
 from studybuddy import sessionmanager as SM
 import json
@@ -86,7 +87,7 @@ def userStudyInterestsUpdate(request):
         return HttpResponse("Error. %s"%e)
     return HttpResponse("OK")
 
-def create_study_session(request):
+def view_maps(request):
     ip_address = get_client_ip(request)
     lng, lat = ip_to_location(ip_address, default=True)
 
@@ -100,3 +101,34 @@ def create_study_session(request):
 
 def dashboardMain(request):
     return render(request, "dashboard.jade")
+
+@require_POST
+def create_study_session(request):
+    from studybuddy.forms import NewStuddyGroupForm
+
+    form = NewStuddyGroupForm(request.POST)
+    if form.is_valid():
+        # continue adding
+
+        try:
+            var = form.cleaned_data
+            loc = Location.create_or_get(var['here_id'],var['place_name'],(var['longitude'],var['latitude']))
+
+            sg = StudyGroup(name=var['name'],
+                            maxMembers=var['maxMembers'],
+                            description=var['description'],
+                            isPrivate=var['isPrivate'],
+                            creator=request.user,
+                            location=loc,
+                            datetime=var['datetime']
+                            targetInterest=StudyInterest.getByID(var['targetInterest']),
+                            targetChannels=InterestChannel.getByIDs(var['targetChannels']))
+            
+            sg.save()
+
+        except Exception, e:
+            import logging
+            logging.exception(e)
+    else:
+        print form.errors
+        # return error
