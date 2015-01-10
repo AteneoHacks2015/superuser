@@ -1,0 +1,30 @@
+extends ./base.jade
+{% block page_header %}
+.col-sm-12
+  .page-header
+    // BREADCRUMBS
+    ul.breadcrumb
+      li
+        i.fa.fa-home
+        a(href='index.html') Home
+      li Dashboard
+    // /BREADCRUMBS
+    .clearfix
+      h3.content-title.pull-left Dashboard
+      // DATE RANGE PICKER
+      span.date-range.pull-right
+        .btn-group
+          a.js_update.btn.btn-default(href='#') Today
+          a.js_update.btn.btn-default(href='#') Last 7 Days
+          a.js_update.btn.btn-default.hidden-xs(href='#') Last month
+          a#reportrange.btn.reportrange
+            i.fa.fa-calendar
+            span
+            
+            i.fa.fa-angle-down
+      // /DATE RANGE PICKER
+    .description Overview, Statistics and more
+{% endblock %}
+
+{% block page_content %}
+{% endblock %}
