@@ -26,6 +26,8 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+#Celery
+BROKER_URL = 'django://'
 
 # Application definition
 
@@ -36,7 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'kombu.transport.django',
     'studybuddy',           # Core
 )
 
