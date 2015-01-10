@@ -1,10 +1,9 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from studybuddy.models import *
+from studybuddy import sessionmanager as SM
 import json
-
 from studybuddy.celery import send_sms
-
 import hashlib
 
 def test(request):
@@ -33,6 +32,16 @@ def createUser(request):
             return redirect("/user/create/")
 
         return HttpResponse("Something went wrong!")
+
+def loginUser(request):
+    if request.method == 'GET':
+        return render(request, "user_login.jade")
+    else:
+        SM.login(request.session, request.POST)
+        return redirect("/")
+def logoutUser(request):
+    SM.logout(request.session)
+    return redirect("/")
 
 def studyInterestsQuery(request):
     results = StudyInterest.searchByName(request.GET.get("query"))

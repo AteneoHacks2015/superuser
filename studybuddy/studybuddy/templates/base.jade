@@ -47,10 +47,11 @@ html(lang='en')
           // END NOTIFICATION DROPDOWN
           // BEGIN USER LOGIN DROPDOWN
           li#header-user.dropdown.user
-            a.dropdown-toggle(href='#', data-toggle='dropdown')
-              img(alt='', src='#{STATIC_URL}')
-              span.username John Doe
-              i.fa.fa-angle-down
+            a.dropdown-toggle(href="#{link}", data-toggle=("dropdown" if SMUser else undefined))
+              - var username = SMUser.username if SMUser else "Login"
+              span.username= username
+              if SMUser
+                i.fa.fa-angle-down
             ul.dropdown-menu
               li
                 a(href='#')
@@ -65,7 +66,7 @@ html(lang='en')
                   i.fa.fa-eye
                   |  Privacy Settings
               li
-                a(href='login.html')
+                a(href='/user/logout/')
                   i.fa.fa-power-off
                   |  Log Out
           // END USER LOGIN DROPDOWN
