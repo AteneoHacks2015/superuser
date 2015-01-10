@@ -1,7 +1,16 @@
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 
 class InterestChannel(models.Model):
     name = models.CharField(max_length=32)
+
+    @classmethod
+    def getByNames(cls, names):
+        try:
+            return cls.objects.filter(name__in=names)
+        except Exception, e:
+            import logging
+            logging.exception(e)
 
 class StudyInterest(models.Model):
     name = models.CharField(max_length=128)
@@ -11,6 +20,14 @@ class StudyInterest(models.Model):
     @classmethod
     def searchByName(cls, keyword):
         return cls.objects.filter(name__contains=keyword)
+
+    @classmethod
+    def getByName(cls, name):
+        try:
+            return cls.objects.get(name=name)
+        except Exception, e:
+            import logging
+            logging.exception(e)
 
 class User(models.Model):
     username = models.CharField(max_length=32, unique=True)
@@ -75,16 +92,38 @@ class User(models.Model):
 
         return newUser
 
+class Location(models.Model):
+    name = models.CharField(max_length=32)
+    here_id = models.CharField(max_length=64, unique=True)
+    lng = models.DecimalField(max_digits=8,decimal_places=5)
+    lat = models.DecimalField(max_digits=8,decimal_places=5)
+
+    @classmethod
+    def create_or_get(cls, here_id, name, long_lat):
+        try:
+            return Location.objects.get(here_id=here_id)
+            
+        except ObjectDoesNotExist:
+            # create new instance of Location
+            try:
+                new_location = Location(name=name, here_id=here_id, lng=long_lat[0], lat=long_lat[1])
+                new_location.save()
+
+                return new_location
+            except Exception, e:
+                import logging
+                logging.exception(e)           
+
 class StudyGroup(models.Model):
-    maxMembers = models.IntegerField()
+    name = models.CharField(max_length=32)
+    maxMembers = models.IntegerField()  # set to 0 for unlimited
     description = models.TextField()
     creator = models.ForeignKey(User, related_name='creator')
-    location = models.TextField()
+    location = models.ForeignKey(Location)
     datetime = models.DateTimeField()
     targetInterest = models.ForeignKey(StudyInterest)
     targetChannels = models.ManyToManyField(InterestChannel)
     members = models.ManyToManyField(User, related_name='members')
-    isPrivate = models.BooleanField(default=False)
     creationTime = models.DateTimeField(auto_now_add=True)
 
 class Notification(models.Model):
