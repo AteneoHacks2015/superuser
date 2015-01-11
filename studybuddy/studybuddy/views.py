@@ -26,7 +26,7 @@ pubsub = redis_server.pubsub()
 def test(request):
     message_id = hashlib.md5('639474325719' + '6:42').hexdigest()
     #send_sms.delay(number='639474325719', message='hi kix', message_id=message_id)
-        
+
     return HttpResponse()
 
 # User Account Views #####################################################################
@@ -67,21 +67,21 @@ def logoutUser(request):
 # AJAX Query Endpoints #####################################################################
 
 def studyInterestsQuery(request):
-    results = StudyInterest.searchByName(request.GET.get("query"))
+    results = StudyInterest.searchByName(request.GET.get("term"))
 
     result_list = []
     for result in results:
-        result_list.append({"name": result.name, "id": result.id})
+        result_list.append({"text": result.name, "id": result.id})
 
-    return HttpResponse(json.dumps(result_list))
+    return HttpResponse(json.dumps({"results": result_list}))
 
 def interestChannelsQuery(request):
-    results = InterestChannel.searchByName(request.GET.get("query"), request.GET.get("interest"))
+    results = InterestChannel.searchByName(request.GET.get("term"), request.GET.get("interest"))
     result_list = []
     for result in results:
-        result_list.append({"name": result.name, "id": result.id})
+        result_list.append({"text": result.name, "id": result.id})
 
-    return HttpResponse(json.dumps(result_list))
+    return HttpResponse(json.dumps({"results": result_list}))
 
 def userInterestChannelsQuery(request):
     user = SM.getUser(request.session)
@@ -174,8 +174,8 @@ def get_study_sessions(request):
     except Exception, e:
         import logging
         logging.exception(e)
-    
-    return HttpResponse(json.dumps([]),content_type="application/json")  
+
+    return HttpResponse(json.dumps([]),content_type="application/json")
 
 @require_POST
 @csrf_exempt
@@ -202,7 +202,7 @@ def create_study_session(request):
                             location=loc,
                             datetime=var['datetime'],
                             targetInterest=StudyInterest.getByName(var['targetInterest']))
-            
+
             sg.save()
 
             study_interest = StudyInterest.getByName(var['targetInterest'])
@@ -240,7 +240,7 @@ def dashboardMain(request):
 #Handlers for each event
 def send_notifs(users, msg):
     for u in users:
-        #generate message_id using timestamp    
+        #generate message_id using timestamp
         send_sms.delay(number=u.phone, message=msg)
         #other notif stuff
         print "users!"
@@ -260,7 +260,7 @@ def generate_message(event_name, **args):
 
         for c in args['channels']:
             message += "#%s"%(c)
-            
+
     return message
 
 def new_group(**args):
@@ -287,11 +287,18 @@ event_handler["NEW_GROUP"] = new_group
 #Callbacks for channel and group listeners
 def channel_listener_callback(message):
     data = message['data']
-    
+
     if not 'type' in data:
         return
 
     event_handler[data['type']](**data)
 
     print 'data!'
-    print data    
+    print data
+    except ObjectDoesNotExist:
+        pass
+    except Exception, e:
+        import logging
+        logging.exception(e)
+
+    return HttpResponse(json.dumps([]),content_type="application/json")

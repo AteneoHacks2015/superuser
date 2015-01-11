@@ -47,53 +47,80 @@ block page_content
             .row
                .col-md-12
                   | Add new Study Interests.
-                  input.form-control#interests(type="text")
+                  select.form-control#interests(multiple)
+                  hr
                   button.btn.btn-info#saveSI Save
 
-   #channelsModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+   #channelsModal.modal.fade(tabindex='2', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
       .modal-dialog
           .modal-content
             .modal-header
                button.close(type='button', data-dismiss='modal')
                   span(aria-hidden='true') &times;
                   span.sr-only Close
-               h4#channelsModalTitle.modal-title Modal title
+               h4#channelsModalTitle.modal-title Manage Channels
             .modal-body
                .row
                   .col-md-12
                      | You are currently subscribed to the following channels under this Study Interest:
                      h4#channels-container
                   br
+               .row
                   .col-md-12
                      | Create and/or subscribe to channels:
-                     input.form-control#channels(type="text")
+                     br
+                     select.form-control#channels(multiple)
             .modal-footer
                button.btn.btn-default(type='button', data-dismiss='modal') Close
                button#saveCH.btn.btn-primary(type='button', data-dismiss='modal') Save changes
 
 
 block post_scripts
-   link(rel='stylesheet', type='text/css', href='#{STATIC_URL}tagsinput/bootstrap-tagsinput.css')
-   script(src='#{STATIC_URL}tagsinput/bootstrap-tagsinput.js')
-   script(src='#{STATIC_URL}js/typeahead.js')
+
    script(type="text/javascript").
+      $.fn.modal.Constructor.prototype.enforceFocus = function () {
+         var that = this;
+         $(document).on('focusin.modal', function (e) {
+            if ($(e.target).hasClass('select2-input')) {
+               return true;
+            }
+
+            if (that.$element[0] !== e.target && !that.$element.has(e.target).length) {
+               that.$element.focus();
+            }
+         });
+      };
       $(document).ready(function() {
-         var studyInterests = new Bloodhound({
-           datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
-           queryTokenizer: Bloodhound.tokenizers.whitespace,
-           remote: '/studyinterests/query/?query=%QUERY',
-         });
-         studyInterests.initialize();
-         $("#interests").tagsinput({
-               typeaheadjs: {
-                  name: 'studyInterests',
-                  displayKey: 'name',
-                  valueKey: 'name',
-                  source: studyInterests.ttAdapter()
-               }
-         });
-         $(".bootstrap-tagsinput").addClass("form-control");
+
          window.SIremovalList = [];
+
+         $("#interests").select2({
+            tags: true,
+            tokenSeparators: [','],
+            minimumInputLength: 3,
+            createSearchChoice: function(term, data) {
+                   if ($(data).filter(function() {
+                     return this.text.localeCompare(term) === 0;
+                   }).length === 0) {
+                     return {
+                       id: term,
+                       text: term
+                     };
+                   }
+                 },
+            multiple: true,
+            ajax: {
+               url: '/studyinterests/query/',
+               dataType: 'json',
+               data: function(term, p) {
+                  return term;
+               },
+               results: function(data, p) {
+                  console.log(data);
+                  return data;
+               }
+            }
+         });
 
          $.ajax(
             {
@@ -117,13 +144,17 @@ block post_scripts
 
          $("#saveSI").click(function() {
             console.log(window.SIremovalList);
+            var addsend;
+            if ($("#interests").val()) {
+               addsend = $("#interests").val().join(",")
+               } else {addsend = ""};
             $.ajax({
                type: "POST",
                url: "/studyinterests/update/",
                data: {
                   csrfmiddlewaretoken: "{{csrf_token}}",
                   removal: window.SIremovalList.join(","),
-                  addition: $("#interests").val()
+                  addition: addsend
                },
                success: function(data) {
                   if (data == 'OK') window.location.reload();
@@ -134,7 +165,7 @@ block post_scripts
          $(".SItag").click(function(){
             var SIid = $(this).attr('id').split("-")[1];
             window.SIid_curr = SIid;
-            $("#channelsModal").modal();
+            $("#channelsModal").modal('show');
             $("#channels-container").html("");
             $.ajax({
                type: "GET",
@@ -155,21 +186,32 @@ block post_scripts
                }
                });
 
-            var interestChannels = new Bloodhound({
-              datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
-              queryTokenizer: Bloodhound.tokenizers.whitespace,
-              remote: '/interestchannels/query/?interest='+ SIid +'&query=%QUERY',
-            });
-            interestChannels.initialize();
-            $("#channels").tagsinput({
-                  typeaheadjs: {
-                     name: 'interestChannels',
-                     displayKey: 'name',
-                     valueKey: 'name',
-                     source: interestChannels.ttAdapter()
+               $("#channels").select2({
+               tags: true,
+               tokenSeparators: [','],
+               minimumInputLength: 3,
+               createSearchChoice: function(term, data) {
+                      if ($(data).filter(function() {
+                        return this.text.localeCompare(term) === 0;
+                      }).length === 0) {
+                        return {
+                          id: term,
+                          text: term
+                        };
+                      }
+                    },
+               multiple: true,
+               ajax: {
+                  url: '/interestchannels/query/?interest='+SIid,
+                  dataType: 'json',
+                  data: function(term, p) {
+                     return term;
+                  },
+                  results: function(data, p) {
+                     return data;
                   }
+               }
             });
-            $(".bootstrap-tagsinput").addClass("form-control");
 
          });
 
@@ -180,7 +222,7 @@ block post_scripts
                data: {
                   csrfmiddlewaretoken: "{{csrf_token}}",
                   interest: window.SIid_curr,
-                  addition: $("#channels").val(),
+                  addition: $("#channels").val().join(","),
                   removal: window.CHremovalList.join(",")
                },
                success: function(data) {
