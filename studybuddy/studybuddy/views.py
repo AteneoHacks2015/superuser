@@ -18,6 +18,7 @@ from studybuddy.celery import send_sms, debug_task
 import hashlib
 
 import redis
+from datetime import datetime
 
 redis_server = redis.StrictRedis(host='localhost', port=6379, db=0)
 pubsub = redis_server.pubsub()
@@ -208,9 +209,11 @@ def create_study_session(request):
             for c in InterestChannel.getByNames(var['targetChannels']):
                 #send event!
                 d = {
-                    'type:' 'NEW_GROUP'
+                    'type': 'NEW_GROUP',
+                    'group_name': var['name'],
                     'interest_name': study_interest.name,
-                    'channel_name': c.name
+                    'channel_name': c.name,
+                    'datetime': sg.datetime
                 }
 
                 redis_server.publish("interest-%s.channel-%s"%(d['interest_name'], d['channel_name']), d)
@@ -235,13 +238,30 @@ def dashboardMain(request):
     return render(request, "dashboard.jade")
 
 #Handlers for each event
-def send_notifs(users):
+def send_notifs(users, msg):
     for u in users:
-        #generate message_id using timestamp -- store in text    
+        #generate message_id using timestamp    
         send_sms.delay(number=u.phone, message=msg)
         #other notif stuff
         print "users!"
         print u
+
+def generate_message(event_name, **args):
+    message = ""
+    if event_name == 'NEW_GROUP':
+        if not 'group_name' in args and not 'interest_name' in args:
+            return
+        if not 'datetime' in args:
+            return
+
+        message = "New relevant study grp. as of %s:\n\n"% (datetime.strftime(args['datetime'], "%d/%m/%y %H:%M"))
+        message += "%s\n"%(args['group_name'])
+        message += "%s"%(args['interest_name'])
+
+        for c in args['channels']:
+            message += "#%s"%(c)
+            
+    return message
 
 def new_group(**args):
     #check for the keys in the data, kinda like RRSV
@@ -255,9 +275,10 @@ def new_group(**args):
     channel = interest.channels.get(name=channel_name)
     users = channel.user_set.all()
 
-    message = "" #create generate_message(event_name, user)
+    message = generate_message(data['type'], **data) #create generate_message(event_name, **args)
 
-    send_notifs(users)
+    if len(message) > 0:
+        send_notifs(users, message)
 
 event_handler = {}
 event_handler["NEW_GROUP"] = new_group
