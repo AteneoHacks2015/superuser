@@ -10,6 +10,8 @@ from django.conf import settings
 
 import hashlib
 
+from datetime import datetime
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'studybuddy.settings')
 
 app = Celery('proj')
@@ -25,7 +27,7 @@ def debug_task(self, t):
 def send_sms(self, number="", message=""):
     print('topkek {0!r}'.format(self.request))
 
-    date_str = datetime.strftime(datetime.now, "%d/%m/%y %H:%M")
+    date_str = datetime.strftime(datetime.now(), "%d/%m/%y %H:%M")
 
     md5 = hashlib.md5()
     md5.update(number + date_str)
@@ -36,4 +38,4 @@ def send_sms(self, number="", message=""):
 
 @app.task(bind=True)
 def send_notification(self, number="", message="", message_id=""):
-    chikka.send_sms(number, message, message_id) 
+    chikka.send_sms(number, message, message_id)

@@ -7,7 +7,7 @@ class InterestChannel(models.Model):
     @classmethod
     def getByNames(cls, names):
         try:
-            return cls.objects.filter(name__in=names)
+            return cls.objects.filter(name__in=names) if isinstance(names, list) else cls.objects.filter(name=names)
         except Exception, e:
             import logging
             logging.exception(e)
