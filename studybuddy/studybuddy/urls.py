@@ -4,6 +4,7 @@ from studybuddy import views
 from django.conf import settings
 
 from django.contrib import admin
+from django.views.generic import TemplateView
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -25,4 +26,5 @@ urlpatterns = patterns('',
     url(r'^studyinterests/queryuser/', 'studybuddy.views.userStudyInterestsQuery', name='userStudyInterestsQuery'),
     url(r'^studyinterests/update/', 'studybuddy.views.userStudyInterestsUpdate', name='userStudyInterestsUpdate'),
     url(r'^interestchannels/query/', 'studybuddy.views.interestChannelsQuery', name='interestChannelsQuery'),
+    url(r'^home/$', TemplateView.as_view(template_name='home.jade'))
 )
