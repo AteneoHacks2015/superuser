@@ -10,7 +10,7 @@ block page_header
                a(href='index.html') Home
             li Map
          // /BREADCRUMBS
-         .description Overview, Statistics and more
+         .description Discover new places to study
 
 block page_content
    //- .col-md-4(style='padding-left:30px;')
@@ -206,8 +206,8 @@ block post_scripts
                         for (i=0; i< data_.length; i++){
                            var data = data_[i];
                            console.log(data);
-                           sessions_html += data.name+" ("+data.interest+
-                           ")<br/>Host: "+data.host+"<br/>Sched: "+data.datetime+"<br/>----------------<br/>";
+                           sessions_html += "<a href='#'>"+data.name+" ("+data.interest+
+                           ")</a><br/>Host: "+data.host+"<br/>Sched: "+data.datetime+"<br/>----------------<br/>";
                            console.log(sessions_html);
                         }
                         $("#reserved-sessions-here").html(sessions_html);

@@ -237,9 +237,14 @@ def create_study_session(request):
 # Dashboard #####################################################################
 
 def dashboardMain(request):
-    if not SM.getUser(request.session):
+    user = SM.getUser(request.session)
+    if not user:
         return redirect('/user/login/')
-    return render(request, "dashboard.jade")
+
+
+    ms = StudyGroup.objects.filter(creator=user)
+
+    return render(request, "dashboard.jade", {'my_sessions':ms})
 
 #Handlers for each event
 def send_notifs(users, msg):
