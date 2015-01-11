@@ -271,18 +271,18 @@ def generate_message(event_name, **args):
 
 def new_group(**args):
     #check for the keys in the data, kinda like RRSV
-    if not 'interest_name' in data and not 'channel_name' in data:
+    if not 'interest_name' in args and not 'channel_name' in args:
         print "\n\n\n\nuh oh\n\n\n\n"
         return
 
-    interest_name = data['interest_name']
-    channel_name= data['channel_name']
+    interest_name = args['interest_name']
+    channel_name= args['channel_name']
 
     interest = StudyInterest.objects.get(name=interest_name)
     channel = interest.channels.get(name=channel_name)
     users = channel.user_set.all()
 
-    message = generate_message(data['type'], **data) #create generate_message(event_name, **args)
+    message = generate_message(args['type'], **args) #create generate_message(event_name, **args)
 
     if len(message) > 0:
         send_notifs(users, message)
