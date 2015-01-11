@@ -10,7 +10,7 @@ class NewStuddyGroupForm(forms.Form):
 
 	#auxilary information not needed by StudyGroup model
 	#but needed in case new Location is to be created
-	place_name = forms.CharField(max_length=32)
+	place_name = forms.CharField(max_length=255)
 	here_id = forms.CharField(max_length=64)
 	longitude = forms.DecimalField(decimal_places=5,max_digits=8)
 	latitude = forms.DecimalField(decimal_places=5,max_digits=8)
