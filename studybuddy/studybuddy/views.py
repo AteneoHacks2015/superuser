@@ -295,10 +295,3 @@ def channel_listener_callback(message):
 
     print 'data!'
     print data
-    except ObjectDoesNotExist:
-        pass
-    except Exception, e:
-        import logging
-        logging.exception(e)
-
-    return HttpResponse(json.dumps([]),content_type="application/json")
