@@ -157,6 +157,8 @@ def view_maps(request):
     return render(request, "maps.jade", vars_)
 
 def get_study_sessions(request):
+    if not SM.getUser(request.session):
+        return redirect('/user/login/')
     from datetime import datetime
     from django.utils import timezone
     try:
@@ -195,6 +197,7 @@ def create_study_session(request):
         print "form valid"
         try:
             var = form.cleaned_data
+            print var
             loc = Location.create_or_get(var['here_id'],var['place_name'],(var['longitude'],var['latitude']))
 
             sg = StudyGroup(name=var['name'],
@@ -207,18 +210,31 @@ def create_study_session(request):
 
             sg.save()
 
-            study_interest = StudyInterest.getByName(var['targetInterest'])
+            '''send_sms.delay()
+
+            study_interest = StudyInterest.objects.get(id=var['targetInterest'])
             for c in InterestChannel.getByNames(var['targetChannels']):
+                print "weh"
                 #send event!
                 d = {
                     'type': 'NEW_GROUP',
                     'group_name': var['name'],
                     'interest_name': study_interest.name,
                     'channel_name': c.name,
-                    'datetime': sg.datetime
+                    'datetime': datetime.strftime(sg.datetime, '%y/%m/%d %H:%M')
                 }
 
-                redis_server.publish("interest-%s.channel-%s"%(d['interest_name'], d['channel_name']), d)
+                redis_server.publish("interest-%s.channel-%s"%(d['interest_name'], d['channel_name']), d)'''
+            study_interest = StudyInterest.objects.get(id=var['targetInterest'])
+            for c in InterestChannel.getByNames(var['targetChannels']):
+                d = {
+                    'type': 'NEW_GROUP',
+                    'group_name': var['name'],
+                    'interest_name': study_interest.name,
+                    'channel_name': c.name,
+                    'datetime': datetime.strftime(sg.datetime, '%y/%m/%d %H:%M')
+                }
+                new_group(**d)
 
             for channel in var['targetChannels'].split(' '):
                 tc = InterestChannel.create_or_get(channel)
@@ -265,11 +281,13 @@ def generate_message(event_name, **args):
             print '\n\n\n\nno datetime\n\n\n\n'
             return
 
-        message = "New relevant study grp. as of %s:\n\n"% (datetime.strftime(args['datetime'], "%d/%m/%y %H:%M"))
+        message = "New relevant study grp. as of %s:\n\n"% (args['datetime'])
+
+
         message += "%s\n"%(args['group_name'])
         message += "%s"%(args['interest_name'])
 
-        for c in args['channels']:
+        for c in args['channel_name']:
             message += "#%s"%(c)
 
     return message
@@ -287,7 +305,11 @@ def new_group(**args):
     channel = interest.channels.get(name=channel_name)
     users = channel.user_set.all()
 
-    message = generate_message(args['type'], **args) #create generate_message(event_name, **args)
+    print 'users'
+    print users
+
+
+    message = generate_message('NEW_GROUP', **args) #create generate_message(event_name, **args)
 
     if len(message) > 0:
         send_notifs(users, message)
@@ -298,13 +320,18 @@ event_handler["NEW_GROUP"] = new_group
 
 #Callbacks for channel and group listeners
 def channel_listener_callback(message):
-    data = message['data']
+    msg = json.loads(message['data'].replace(" u'"," '"))
+    print "\n\n\n\n\n\n\n\n"
+    print msg['data']
 
-    if not 'type' in data:
-        print '\n\n\n\nno type!\n\n\n\n'
-        return
+    print type(msg['data'])
+    data = msg
 
-    event_handler[data['type']](**data)
+    print "\n\n\n\n\n\n\n\n"
+
+
+    print type(data)
+    new_group(**data)
 
     print 'data!'
     print data

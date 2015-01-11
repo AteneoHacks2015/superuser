@@ -54,24 +54,25 @@ html(lang='en')
     // PAGE
     section#page
       // SIDEBAR
-      #sidebar.sidebar
-        .sidebar-menu.nav-collapse
-          .divide-20
-          // SEARCH BAR
-          #search-bar
-            input.search(type='text', placeholder='Search')
-            i.fa.fa-search.search-icon
-          // /SEARCH BAR
-          // SIDEBAR MENU
-          ul
-            li
-              a(href='/dashboard/')
-                i.fa.fa-tachometer.fa-fw
-                span.menu-text Dashboard
-            li
-              a(href='/map/')
-                i.fa.fa-map-marker.fa-fw
-                span.menu-text Map
+      if SMUser
+        #sidebar.sidebar
+          .sidebar-menu.nav-collapse
+            .divide-20
+            // SEARCH BAR
+            #search-bar
+              input.search(type='text', placeholder='Search')
+              i.fa.fa-search.search-icon
+            // /SEARCH BAR
+            // SIDEBAR MENU
+            ul
+              li
+                a(href='/dashboard/')
+                  i.fa.fa-tachometer.fa-fw
+                  span.menu-text Dashboard
+              li
+                a(href='/map/')
+                  i.fa.fa-map-marker.fa-fw
+                  span.menu-text Map
       // /SIDEBAR
       #main-content
         .container
