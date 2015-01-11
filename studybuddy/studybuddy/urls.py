@@ -26,5 +26,5 @@ urlpatterns = patterns('',
     url(r'^studyinterests/queryuser/', 'studybuddy.views.userStudyInterestsQuery', name='userStudyInterestsQuery'),
     url(r'^studyinterests/update/', 'studybuddy.views.userStudyInterestsUpdate', name='userStudyInterestsUpdate'),
     url(r'^interestchannels/query/', 'studybuddy.views.interestChannelsQuery', name='interestChannelsQuery'),
-    url(r'^home/$', TemplateView.as_view(template_name='home.jade'))
+    url(r'^$', TemplateView.as_view(template_name='home.jade'))
 )
