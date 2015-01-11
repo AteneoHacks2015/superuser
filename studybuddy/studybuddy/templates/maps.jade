@@ -88,7 +88,7 @@ block post_scripts
       var studyInterests = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
         queryTokenizer: Bloodhound.tokenizers.whitespace,
-        remote: '/studyinterests/query/?query=%QUERY',
+        remote: '/studyinterests/query/?term=%QUERY',
       });
       studyInterests.initialize();
 

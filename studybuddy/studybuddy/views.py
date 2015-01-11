@@ -55,6 +55,8 @@ def createUser(request):
         return HttpResponse("Something went wrong!")
 
 def loginUser(request):
+    if SM.getUser(request.session):
+        return redirect('/dashboard/')
     if request.method == 'GET':
         return render(request, "user_login.jade")
     else:
@@ -62,7 +64,7 @@ def loginUser(request):
         return redirect("/dashboard/")
 def logoutUser(request):
     SM.logout(request.session)
-    return redirect("/login/")
+    return redirect("/user/login/")
 
 # AJAX Query Endpoints #####################################################################
 
@@ -235,6 +237,8 @@ def create_study_session(request):
 # Dashboard #####################################################################
 
 def dashboardMain(request):
+    if not SM.getUser(request.session):
+        return redirect('/user/login/')
     return render(request, "dashboard.jade")
 
 #Handlers for each event

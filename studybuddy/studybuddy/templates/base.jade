@@ -35,24 +35,15 @@ html(lang='en')
           // END NOTIFICATION DROPDOWN
           // BEGIN USER LOGIN DROPDOWN
           li#header-user.dropdown.user
-            a.dropdown-toggle(href="#{link}", data-toggle=("dropdown" if SMUser else undefined))
-              - var username = SMUser.username if SMUser else "Login"
-              span.username= username
-              if SMUser
+            if SMUser
+              a.dropdown-toggle(href="#", data-toggle="dropdown")
+                span.username= SMUser.username
+                |&nbsp;
                 i.fa.fa-angle-down
+            else
+              a.dropdown-toggle(href="/user/login")
+                span.username Login
             ul.dropdown-menu
-              li
-                a(href='#')
-                  i.fa.fa-user
-                  |  My Profile
-              li
-                a(href='#')
-                  i.fa.fa-cog
-                  |  Account Settings
-              li
-                a(href='#')
-                  i.fa.fa-eye
-                  |  Privacy Settings
               li
                 a(href='/user/logout/')
                   i.fa.fa-power-off
@@ -74,7 +65,7 @@ html(lang='en')
           // SIDEBAR MENU
           ul
             li
-              a(href='index.html')
+              a(href='/dashboard/')
                 i.fa.fa-tachometer.fa-fw
                 span.menu-text Dashboard
             li
