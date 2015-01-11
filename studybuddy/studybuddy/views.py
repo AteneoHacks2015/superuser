@@ -254,8 +254,10 @@ def generate_message(event_name, **args):
     message = ""
     if event_name == 'NEW_GROUP':
         if not 'group_name' in args and not 'interest_name' in args:
+            print '\n\n\n\nno group and interest_name'
             return
         if not 'datetime' in args:
+            print '\n\n\n\nno datetime\n\n\n\n'
             return
 
         message = "New relevant study grp. as of %s:\n\n"% (datetime.strftime(args['datetime'], "%d/%m/%y %H:%M"))
@@ -270,6 +272,7 @@ def generate_message(event_name, **args):
 def new_group(**args):
     #check for the keys in the data, kinda like RRSV
     if not 'interest_name' in data and not 'channel_name' in data:
+        print "\n\n\n\nuh oh\n\n\n\n"
         return
 
     interest_name = data['interest_name']
@@ -293,6 +296,7 @@ def channel_listener_callback(message):
     data = message['data']
 
     if not 'type' in data:
+        print '\n\n\n\nno type!\n\n\n\n'
         return
 
     event_handler[data['type']](**data)
