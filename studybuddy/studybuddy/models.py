@@ -11,6 +11,7 @@ class InterestChannel(models.Model):
         except Exception, e:
             import logging
             logging.exception(e)
+    @classmethod
     def searchByName(cls, keyword, interest):
         try:
             interest = StudyInterest.objects.get(id=interest)
@@ -28,7 +29,7 @@ class InterestChannel(models.Model):
                 ic = InterestChannel(name=name)
                 ic.save()
                 print name," created as new InterestChannel"
-                
+
                 return ic
             except Exception, e:
                 import logging
