@@ -34,7 +34,7 @@ block page_content
           .modal-header
             button.close(type='button', data-dismiss='modal')
               span(aria-hidden='true') &times;
-              span.sr-only Close  
+              span.sr-only Close
             h3#myModalLabel.modal-title Study at
                span#study-location-name
           form.form-horizontal#create-study-session(role="form")
@@ -50,7 +50,8 @@ block page_content
                   .form-group
                      label(for='target-interest')
                         | Interest
-                     input.form-control#target-interest(type='text',required,name="targetInterest")
+                      br
+                     select.form-control#target-interest(multiple,required,name="targetInterest", style="width: 400px;")
                   .form-group
                      label(for='target-channels')
                         | Channels
@@ -70,11 +71,11 @@ block page_content
                   input(type='hidden',name='place_name')
 
                .modal-footer
-                  button.btn.btn-default(type='button', data-dismiss='modal') Close   
+                  button.btn.btn-default(type='button', data-dismiss='modal') Close
                   button.btn.btn-primary(type='submit') Create Study Session
 
 block post_scripts
-   link(rel='stylesheet', type='text/css', href='http://js.api.here.com/v3/3.0/mapsjs-ui.css')  
+   link(rel='stylesheet', type='text/css', href='http://js.api.here.com/v3/3.0/mapsjs-ui.css')
    script(type='text/javascript', charset='UTF-8', src='http://js.api.here.com/v3/3.0/mapsjs-core.js')
    script(type='text/javascript', charset='UTF-8', src='http://js.api.here.com/v3/3.0/mapsjs-service.js')
    script(type='text/javascript', charset='UTF-8', src='http://js.api.here.com/v3/3.0/mapsjs-mapevents.js')
@@ -85,29 +86,40 @@ block post_scripts
    script(src="#{STATIC_URL}js/jquery.noty.packaged.min.js")
 
    script
-      var studyInterests = new Bloodhound({
-        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
-        queryTokenizer: Bloodhound.tokenizers.whitespace,
-        remote: '/studyinterests/query/?term=%QUERY',
-      });
-      studyInterests.initialize();
-
-      $("#target-interest").tagsinput({
-            typeaheadjs: {
-               name: 'studyInterests',
-               displayKey: 'name',
-               valueKey: 'name',
-               source: studyInterests.ttAdapter()
+      $("#target-interest").select2({
+            tags: true,
+            tokenSeparators: [','],
+            minimumInputLength: 3,
+            createSearchChoice: function(term, data) {
+                   if ($(data).filter(function() {
+                     return this.text.localeCompare(term) === 0;
+                   }).length === 0) {
+                     return {
+                       id: term,
+                       text: term
+                     };
+                   }
+                 },
+            multiple: true,
+            ajax: {
+               url: '/studyinterests/query/',
+               dataType: 'json',
+               data: function(term, p) {
+                  return term;
+               },
+               results: function(data, p) {
+                  console.log(data);
+                  return data;
+               }
             }
-      });
-      $(".bootstrap-tagsinput").addClass("form-control");
+         });
 
 
       function addMarkerToGroup(group, coordinate, html) {
         var marker = new H.map.Marker(coordinate);
         // add custom data to the marker
         marker.setData(html);
-        group.addObject(marker); 
+        group.addObject(marker);
       }
 
       var location_long = {{ lng }}, location_lat = {{ lat }};
@@ -146,7 +158,7 @@ block post_scripts
             // url: '//geocoder.cit.api.here.com/6.2/geocode.json',
             // data: {'searchtext': query, 'app_id': app_id, 'app_code':app_code, 'gen': 6},
             url: '//places.demo.api.here.com/places/v1/discover/search',
-            data: {'at': location_long + "," + location_lat, 
+            data: {'at': location_long + "," + location_lat,
                    'accept': 'application/json',
                    'q': query, 'app_id': app_id, 'app_code':app_code},
             dataType: 'json',
@@ -154,7 +166,7 @@ block post_scripts
                console.log('removing previous objects');
                // remove previous search
                try{
-                 map.removeObjects(map.getObjects());            
+                 map.removeObjects(map.getObjects());
                }catch(err){}
 
                var group = new H.map.Group();
@@ -224,12 +236,12 @@ block post_scripts
                      'data-toggle="modal">Plan a study session here!</a></div>'});
                }
                map.setViewBounds(group.getBounds());
-               
+
                window.setTimeout(function(){
                   if (map.getZoom() > 13){
                   map.setZoom(map.getZoom() - 1, true);}
                },80);
-               
+
             },
             error: function(data){
                console.log('error');
@@ -257,7 +269,7 @@ block post_scripts
             }
             else {
                paramObj[kv.name] = kv.value;
-            }   
+            }
          });
 
          $.ajax({
@@ -277,15 +289,15 @@ block post_scripts
       function getUrlParameter(sParam){
           var sPageURL = window.location.search.substring(1);
           var sURLVariables = sPageURL.split('&');
-          for (var i = 0; i < sURLVariables.length; i++) 
+          for (var i = 0; i < sURLVariables.length; i++)
           {
               var sParameterName = sURLVariables[i].split('=');
-              if (sParameterName[0] == sParam) 
+              if (sParameterName[0] == sParam)
               {
                   return sParameterName[1];
               }
           }
-      }   
+      }
 
       $(document).ready(function(){
          // check if search exist, if so search it
@@ -312,7 +324,7 @@ block post_scripts
          }catch(err){}
 
       });
-block css   
+block css
    link(rel='stylesheet', type='text/css', href='#{STATIC_URL}css/jquery.datetimepicker.css')
    link(rel='stylesheet', type='text/css', href='#{STATIC_URL}tagsinput/bootstrap-tagsinput.css')
    style
