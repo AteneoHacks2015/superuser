@@ -50,6 +50,26 @@ block page_content
                   select.form-control#interests(multiple)
                   hr
                   button.btn.btn-info#saveSI Save
+   .col-md-12
+      .box.border.grey
+         .box-title
+            h4
+               i.fa-book.fa
+               span Your Study Sessions
+         .box-body
+            table.datatable.table.table-hover.table-bordered.table-striped
+               thead
+                  th Name
+                  th Topics
+                  th Location
+                - var values = my_sessions
+               
+               tbody
+                  each session in values
+                     tr
+                        td #{session.name}
+                        td #{session.targetInterest.name}
+                        td #{session.location.name}
 
    #channelsModal.modal.fade(tabindex='2', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
       .modal-dialog
