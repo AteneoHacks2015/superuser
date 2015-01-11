@@ -203,7 +203,7 @@ def create_study_session(request):
                             creator=user,
                             location=loc,
                             datetime=var['datetime'],
-                            targetInterest=StudyInterest.getByName(var['targetInterest']))
+                            targetInterest=StudyInterest.objects.get(id=var['targetInterest']))
 
             sg.save()
 
