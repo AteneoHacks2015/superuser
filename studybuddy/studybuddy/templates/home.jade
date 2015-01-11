@@ -1,0 +1,182 @@
+doctype html(lang='en')
+head
+    meta(http-equiv='content-type', content='text/html; charset=UTF-8')
+    meta(charset='utf-8')
+    title Cloud Responsive Bootstrap Theme - Home
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    meta(name='description', content='')
+    link(rel='stylesheet', type='text/css', href='#{STATIC_URL}css/cloud-admin-frontend.css')
+    link(href='#{STATIC_URL}font-awesome/css/font-awesome.min.css', rel='stylesheet')
+    link(rel='stylesheet', type='text/css', href='#{STATIC_URL}js/colorbox/colorbox.min.css')
+    link(href='#{STATIC_URL}css/carousel.css', rel='stylesheet')
+    link(href='http://fonts.googleapis.com/css?family=Open+Sans:300,400,600', rel='stylesheet', type='text/css')
+  body
+    // PAGE
+    #page
+      // HEADER
+      section#header(data-type='background', data-speed='10')
+        // OVERLAY
+        // <div class="overlay">
+        #sidebar-collapse.sidebar-collapse.btn.visible-xs
+          i.fa.fa-bars(data-icon2='fa fa-bars', data-icon1='fa fa-bars')
+        .divide60
+        // HERO
+        .container-transparent.text-center
+          ul.heronav.left.hidden-xs(style="margin-left:-350px")
+            li
+              a(href='#parallax-1') Demo
+            li
+              a(href='#features') Features
+          ul.heronav.right.hidden-xs(style="margin-left:100px")
+            li
+              a(href='#contact') Contact
+            li
+              a.external(href='/user/login/') Login
+          h1(style="margin-top:40px;")
+            i.fa.fa-graduation-cap
+            img(src='#{STATIC_URL}img/studybuddy.png', height='30')
+          br
+          h1.page-title
+            | Study alone, never again
+          h4.page-sub-title
+            |  
+          .showcase
+            a.btn.btn-warning.btn-lg.hidden-xs(href='#portfolio')
+              | Learn More &nbsp;&nbsp;
+              i.fa.fa-play
+      #nav-bar
+        .container
+          .row
+            .col-sm-3.col-md-4
+              .logo
+                a(href='index.html')
+                  img(src='#{STATIC_URL}img/logo/logo.png', height='40', alt='logo name')
+            .col-sm-9.col-md-8
+              nav#fixed-top-navigation
+                ul.list-inline.pull-right
+                  li
+                    a(href='#portfolio') Portfolio
+                  li
+                    a(href='#parallax-1') Demo
+                  li
+                    a(href='#features') Features
+                  li
+                    a(href='#about') About
+                  li
+                    a(href='#contact') Contact
+                  li
+                    a.external(href='../login.html') Login
+      // /NAV-BAR
+      // PARALLAX DIALOGUE UNIT
+      section#parallax-1.pages.text-center(data-type='background', data-speed='10')
+        .parallax-overlay.text-center
+          h2.text-center
+            span.bigintro-light Product Demo
+
+          img(src="#{STATIC_URL}img/demo1.png")
+      // /PARALLAX DIALOGUE UNIT
+      // FEATURES UNIT
+      section#features.color-light
+        .container
+          .divide40
+          .row
+            .col-md-12
+              h2.text-center
+                span.bigintro Features
+          .divide60
+          .row
+            .col-md-3.col-sm-6
+              .feature
+                i.extralarge.fa.fa-graduation-cap
+                br
+                br
+                h3 Built for Students
+                br
+                p
+                  | Build and designed to help students study
+            .col-md-3.col-sm-6
+              .feature
+                i.extralarge.fa.fa-map-marker
+                br
+                br
+                h3 Maps Integrated
+                br
+                p
+                  | Powered by Here.com
+            .col-md-3.col-sm-6
+              .feature
+                i.extralarge.fa.fa-bullhorn
+                br
+                br
+                h3 SMS Notifications
+                br
+                p
+                  | Powered by Chikka
+            .col-md-3.col-sm-6
+              .feature
+                i.extralarge.fa.fa-mobile
+                br
+                br
+                h3 Mobile
+                br
+                p
+                  | Mobile Responsive
+          .divide60
+      // /FEATURES UNIT
+      // TESTIMONIALS
+      section#parallax-2.pages.textcenter(data-type='background', data-speed='10')
+        .parallax-overlay
+          h2.text-center
+            span.bigintro-light Testimonials
+          #myCarousel.carousel.slide
+            .carousel-inner
+              .item.active
+                .container
+                  .carousel-caption
+                    .row
+                      .circular.col-md-6
+                        img(src='#{STATIC_URL}img/wilson_photo.jpg', alt='headshot #1')
+                        h3 Wilson Talento
+                        p
+                          | &quot;I love how i can easily find other students to study. I'm an outgoing person, and Studybuddy helps me collaborate with friends and acquaintance as well as other students from the university. Studybuddy has helped me a lot with my school work. &quot;
+                      .circular.col-md-6
+                        img(src='#{STATIC_URL}img/ivan_photo.jpg', alt='headshot #2')
+                        h3 Ivan Baguio
+                        p
+                          | &quot;The technology behind Studybuddy is very disruptive to the education sector. With Studybuddy students can collaborate at un unprecedented level, imagine now you can ask help and help other students studying similar courses as you even if they are not your classmates.&quot;
+          .divide85
+      // CONTACT-US
+      section#parallax-3.pages.text-center(data-type='background', data-speed='10')
+        .parallax-overlay
+          section#contact
+            section.container
+              .divide40
+              .row
+                .col-md-12
+                  h2.text-center
+                    span.bigintro-light Contact Us
+              .divide20
+              .row
+                .col-md-6.col-md-offset-3.form-input
+                  input#company(type='text', placeholder='Company', value='', name='company')
+                .col-md-6.col-md-offset-3.form-input
+                  input#title(type='text', placeholder='Title', value='', name='title')
+                .col-md-6.col-md-offset-3.form-input
+                  input#name(type='text', placeholder='Name', value='', name='name')
+                .col-md-6.col-md-offset-3.form-input
+                  input#email(type='email', placeholder='Email', value='', name='email')
+                .col-md-6.col-md-offset-3.form-input
+                  textarea#message(placeholder='Message', name='message')
+                .col-md-6.col-md-offset-3.form-submit
+                  button#submit.btn.btn-warning.btn-lg(type='submit') SEND
+              .divide60
+      // /CONTACT-US
+    // JAVASCRIPTS
+    // Placed at the end of the document so the pages load faster
+    script(src='#{STATIC_URL}js/jquery-1.9.1.min.js')
+    script(src='#{STATIC_URL}bootstrap-dist/js/bootstrap.min.js')
+    script(type='text/javascript', src='#{STATIC_URL}js/colorbox/jquery.colorbox.min.js')
+    script(src='#{STATIC_URL}js/script.js')
+
+    style
+      .feature{min-height: 250px !important}

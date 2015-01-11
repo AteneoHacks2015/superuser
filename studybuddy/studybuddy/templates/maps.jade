@@ -251,7 +251,7 @@ block post_scripts
          minDate:0
       });
 
-      $("form#create-study-session").click(function(e){
+      $("form#create-study-session").submit(function(e){
          e.preventDefault();
 
          var paramObj = {};
