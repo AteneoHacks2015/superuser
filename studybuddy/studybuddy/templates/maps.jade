@@ -13,24 +13,19 @@ block page_header
          .description Overview, Statistics and more
 
 block page_content
-   //- span
-   //-    | your ip address is {{ ip_address }}
-   //- br
-   //- span
-   //-    | your geolocation is {{ lng }}, {{ lat }}
-   //- br
-   .col-md-4(style='padding-left:30px;')
-      .row
-         form.form-inline#search-form(role='form')
-            .form-group
-               input.form-control#search-query(type='text',placeholder='Search Place to Study')
-            .form-group
-               button#location-search(type='button',class='btn btn-success')
-                  | Search
+   //- .col-md-4(style='padding-left:30px;')
+   //-    .row
+   #floating
+    form.form-inline#search-form(role='form')
+      .form-group
+         input.form-control#search-query(type='text',placeholder='Search Place to Study')
+      .form-group
+         button#location-search(type='button',class='btn btn-info')
+            | Search
       .row
 
-   .col-md-8
-      #map(style='width: 99%; height: 400px; background: grey; margin-right: 1%')
+   .col-md-12(style="margin-top:-25px")
+      #map(style='width: 99%; height: 500px; background: grey; margin-right: 1%')
 
    // Modal
    #create-session-modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
@@ -324,3 +319,9 @@ block css
       span.infobubble-vicinity{font-size: 12px;}
       .modal-body{padding: 5px 70px}
       #reserved-sessions-here{font-size: 10px}
+      #floating{
+        position: absolute;
+        top: 110;
+        left: 70;
+        z-index: 10;
+      }
